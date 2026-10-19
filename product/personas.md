@@ -64,7 +64,7 @@ One working session, maximum one page of Excel dependency in her notes, with per
 ## 5. Design implications for the inventory (what changes in the product)
 
 - **Denominator-translation** (Priya's #1 review risk — from S02/S04/S08 conflict precedent) → every numeric surface labels its counting basis.
-- **"Field not yet available" ≠ 0** for missing metrics—Kerala validated targets variants are Strawlabeled (**S16–S18**).
+- **"Field not yet available" ≠ 0** for missing metrics — Kerala's two target variants are co-labeled with their years (**S16–S18**).
 - **Citation one-click-away** → provenance chip component everywhere a number appears.
 - **Conflict renderer** when both numbers exist (e.g., PIB vs Zinnov Fig.) → discussion-invitation, not decision-correction.
 - **No bulk exports and no bulk contact data** in v1 → wave that touches persona 2 without triggering persona 1's mimicry-driven data hoarding.

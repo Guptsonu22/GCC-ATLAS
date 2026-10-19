@@ -24,7 +24,7 @@
 **Failure paths:**
 - *No metric for a city in a group* → row view "not yet tracked" + which register/source would supply it; no interpolation.
 - *Assistant overreach* → insufficient-evidence reply + suggested rephrase (existing insufficient-evidence logic).
-- *Draft policy spotted mid-flow* → non-blocking banner on rows (`draft`/`final`) so Kerala never enters a deck as actionable — protects Priya's Cinder review.
+- *Draft policy spotted mid-flow* → non-blocking banner on rows (`draft`/`final`) so Kerala never enters a deck as actionable — protects Priya's review credibility.
 
 ---
 

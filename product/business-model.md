@@ -34,7 +34,7 @@
 
 Anchor facts from the market: comparable products at **$3,500–$10,000** per-seat cycles (**S30**); historical static list price **$9,999–** (**S33**); free tier in market = 15 members (**S30**). These anchors set a *ceiling* reference, not our price.
 
-- **H2a — Pro individual: $99–$199/yr** (self-serve desk 用途; ≈ 3–6% of the alternate tool's annual per-seat). Features: unlimited saved comparisons, share links, export, policy-change email alerts (once F17 re-enters), priority support.
+- **H2a — Pro individual: $99–$199/yr** (self-serve desk use; ≈ 3–6% of the alternate tool's annual per-seat). Features: unlimited saved comparisons, share links, export, policy-change email alerts (once F17 re-enters), priority support.
 - **H2b — Team: $500–$2,000/yr per 3–5 seats** with shared saved sets, audit-tagged org notes. ∆ price-fat vs. team adoption **[proposal]**.
 - **H4a — Report: $0 (free standard quarterly) / $299–$499 one-off thematic deep-dive** once publishing muscle exists.
 - **H5a — Provider Verified profile: $199–$499/yr**, strictly non-ranking (§5).

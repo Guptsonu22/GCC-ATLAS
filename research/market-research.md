@@ -36,7 +36,7 @@ Cross-checks: Reuters (S02) and Times of India (S03) agree on FY2026 Nasscom–Z
 
 **Implication:** the product's demand signal is strong and fresh — the GCC establishment decision is visible in office leasing, not only in reports on builds.
 
-### 4.2 Compensation (why GCC roles are attractive and GREMLINnable)
+### 4.2 Compensation (why GCC talent command a premium)
 - TeamLease Digital (S25/S28): **GCCs pay 12–20% above IT services** at entry/mid; skill-specific premiums wider at senior levels; gender pay gap 10–17% generally, 22–30% in data-analysis roles.
 - NLB Services (S26): expected 9.8% salary growth next 12 months; AI/ML roles forecast +30–50% vs traditional IT; `fresher` gender-pay gap needs attention.
 - CIEL Works / Taggd / ANSR Research / Deloitte (S27/S29): premium range **8–30%** depending on function; specialist AI/cloud/cyber/semiconductor/PM/data roles 15–40% above equivalent IT-services roles; niche digital hires command **30–45% transition hikes**; mid-career AI/platform roles cluster at **₹35–60 LPA**.

@@ -34,7 +34,7 @@
 - **Definition (freshness):** % of source records re-verified within the last 180 days; % of policy rows whose `status` was checked within the last 60 days (draft-state recency: Kerala's draft, **S16**, exists to catch exactly this).
 - **Definition (completeness):** coverage of the planned core metric set (talent signal, GCC-unit count, rent index, policy posture) per configured city; reported as numerator/denominator with the "not yet tracked" exposure actually visible (e.g., Tier-2 talent coverage across 12-city seed).
 - **Instrument:** register timestamps, seed report, admin coverage page.
-- **Proposed targets [proposal]:** freshness ≥ 95% re-verified ≤ 180 days at每 Phase gate; completeness ≥ 80% core metrics per city **for the 6 hub cities** (Phase-2 scope; tier-2 cities ride along at whatever the register supports — never padded). *Assumption:* given 5-month-old FY2026 anchoring (latest reportuations from May 2026, **S02/S03**), a 180-day cycle is achievable for a manual research cadence; complete tier-2 depth is not promised per open-questions Q6.
+- **Proposed targets [proposal]:** freshness ≥ 95% re-verified ≤ 180 days at every Phase gate; completeness ≥ 80% core metrics per city **for the 6 hub cities** (Phase-2 scope; tier-2 cities ride along at whatever the register supports — never padded). *Assumption:* given 5-month-old FY2026 anchoring (latest report releases from May 2026, **S02/S03**), a 180-day cycle is achievable for a manual research cadence; complete tier-2 depth is not promised per open-questions Q6.
 - **Revisit:** every Phase gate + at submission time.
 
 ### M6 — User retention and potential paid conversion
