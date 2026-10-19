@@ -136,6 +136,16 @@ export const providerSchema = z.object({
 
 export const providersResponseSchema = paginatedSchema(providerSchema);
 
+export type CityMetric = z.infer<typeof cityMetricSchema>;
+export type CityDetail = z.infer<typeof cityDetailSchema>;
+export type Location = z.infer<typeof locationSchema>;
+export type Provider = z.infer<typeof providerSchema>;
+export type DashboardStats = z.infer<typeof dashboardStatsSchema>;
+export type Announcement = z.infer<typeof announcementSchema>;
+export type AIQueryResponse = z.infer<typeof aiQueryResponseSchema>;
+export type AssistantStatus = z.infer<typeof assistantStatusSchema>;
+export type SavedResearch = z.infer<typeof savedResearchSchema>;
+
 export const dashboardStatsSchema = z.object({
   total_companies: z.number(),
   total_locations: z.number(),
