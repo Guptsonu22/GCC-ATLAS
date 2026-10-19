@@ -1,0 +1,30 @@
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+node:events:502
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: EPIPE: broken pipe, write
+    at Socket._write (node:internal/net:61:18)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at DotReporter.onTestCaseResult (file:///C:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/backend/node_modules/vitest/dist/chunks/index.UpGiHP7g.js:3185:73)
+    at file:///C:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/backend/node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js:14051:56
+    at Array.map (<anonymous>)
+    at Vitest.report (file:///C:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/backend/node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js:14051:36)
+    at TestRun.reportEvent (file:///C:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/backend/node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js:12736:85)
+    at TestRun.updated (file:///C:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/backend/node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js:12660:54)
+Emitted 'error' event on Socket instance at:
+    at Socket.onerror (node:internal/streams/readable:1028:14)
+    at Socket.emit (node:events:524:28)
+    at emitErrorNT (node:internal/streams/destroy:169:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:128:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  errno: -4047,
+  syscall: 'write',
+  code: 'EPIPE'
+}
+
+Node.js v20.20.2
