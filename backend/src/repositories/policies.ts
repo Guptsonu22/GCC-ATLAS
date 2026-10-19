@@ -1,6 +1,10 @@
 import type { Database } from 'sqlite';
 
 export function createPoliciesRepo(db: Database) {
+  async function listSectors() {
+    return db.all('SELECT id, name, description FROM sectors ORDER BY name ASC');
+  }
+
   async function listPolicies() {
     return db.all(
       `SELECT p.*, s.title AS source_title, s.url AS source_url, s.verification_status AS source_verification_status
@@ -17,7 +21,7 @@ export function createPoliciesRepo(db: Database) {
     );
   }
 
-  return { listPolicies, getPolicy };
+  return { listPolicies, getPolicy, listSectors };
 }
 
 export type PoliciesRepo = ReturnType<typeof createPoliciesRepo>;

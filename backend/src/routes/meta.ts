@@ -49,6 +49,15 @@ export function metaRoutes(db: Database): Router {
     }
   });
 
+  // Sectors
+  router.get('/sectors', async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.json({ data: await policiesRepo.listSectors() });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   // Announcements
   router.get('/announcements', async (req: Request, res: Response, next: NextFunction) => {
     try {
