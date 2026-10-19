@@ -100,5 +100,17 @@ export function metaRoutes(db: Database): Router {
     }
   });
 
+  router.get('/policies/:id', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const policy = await policiesRepo.getPolicy(req.params.id as string);
+      if (!policy) {
+        return void res.status(404).json({ error: { code: 'not_found', message: `Policy '${req.params.id}' not found` } });
+      }
+      res.json(policy);
+    } catch (err) {
+      next(err);
+    }
+  });
+
   return router;
 }
