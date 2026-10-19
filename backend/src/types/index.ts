@@ -18,18 +18,23 @@ export interface Location {
   updated_at: string;
 }
 
-export interface Source {
+export interface SourceRecord {
   id: string;
   title: string;
   url: string;
+  publisher: string | null;
   source_type: 'news' | 'government' | 'company_announcement' | 'report' | 'job_board' | 'provider_website' | 'other';
   publication_date: string | null;
   last_verified_date: string;
   verification_status: 'verified' | 'unverified' | 'stale' | 'conflicting';
+  confidence_level: 'high' | 'medium' | 'low';
   notes: string | null;
   created_at: string;
   updated_at: string;
 }
+
+/** Back-compatible alias (table renamed to `source_records` in Phase 3). */
+export type Source = SourceRecord;
 
 export interface Company {
   id: string;
@@ -108,7 +113,6 @@ export interface Provider {
   contact_phone: string | null;
   headquarters_location_id: string | null;
   operating_locations: string | null; // JSON array
-  capabilities: string | null; // JSON array
   case_studies: string | null; // JSON array
   founded_year: number | null;
   employee_count: number | null;
@@ -117,6 +121,9 @@ export interface Provider {
   created_at: string;
   updated_at: string;
 }
+
+/** Back-compatible alias (table renamed to `service_providers` in Phase 3). */
+export type ServiceProvider = Provider;
 
 export interface ProviderWithRelations extends Provider {
   headquarters_location?: Location;
@@ -142,13 +149,15 @@ export interface ProviderSource {
   source?: Source;
 }
 
-export interface Policy {
+export interface PolicyRecord {
   id: string;
   title: string;
   state: string;
   policy_type: 'incentive' | 'regulation' | 'infrastructure' | 'talent' | 'tax' | 'land' | 'other';
+  status: 'draft' | 'finalized' | 'announced' | 'superseded';
   description: string | null;
   benefits: string | null; // JSON array
+  normalized_benefits: string | null; // JSON array of {type, band_or_amount, eligibility_threshold, notes}
   eligibility_criteria: string | null;
   effective_date: string | null;
   expiry_date: string | null;
@@ -156,8 +165,11 @@ export interface Policy {
   is_active: number;
   created_at: string;
   updated_at: string;
-  source?: Source;
+  source?: SourceRecord;
 }
+
+/** Back-compatible alias (table renamed to `policy_records` in Phase 3). */
+export type Policy = PolicyRecord;
 
 export interface Announcement {
   id: string;
@@ -181,12 +193,33 @@ export interface Announcement {
 
 export interface SavedResearch {
   id: string;
-  user_id: string;
+  session_key: string;
+  user_id: string | null;
   name: string;
   type: 'city_comparison' | 'company_comparison' | 'provider_comparison' | 'custom_query';
   data: string; // JSON
   created_at: string;
   updated_at: string;
+}
+
+export interface SavedComparison {
+  id: string;
+  session_key: string;
+  user_id: string | null;
+  name: string;
+  type: 'city_comparison' | 'company_comparison';
+  location_ids: string; // JSON array
+  metric_names: string | null; // optional JSON array
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SavedComparisonInput {
+  name: string;
+  location_ids: string[];
+  metric_names?: string[];
+  notes?: string;
 }
 
 // API request/response types
