@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+backend/.env
+backend/.env.local
+frontend/.env
+frontend/.env.local
+
+# SQLite data files (local dev databases are never committed)
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+backend/data/
+frontend/data/
+
+# Coverage / logs
+coverage/
+*.log
+npm-debug.log*
+
+# OS noise
+.DS_Store
+Thumbs.db

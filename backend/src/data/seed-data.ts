@@ -44,43 +44,53 @@ export const locations = [
   { id: 'loc_thiruvananthapuram', name: 'Thiruvananthapuram', state: 'Kerala', tier: 'emerging', population: 1700000, gdp_per_capita_usd: null },
 ];
 
-// Stable reference sources. Exact article URLs are avoided where they cannot be
-// guaranteed; publication/portal homepages + notes are used instead.
-export const sources = [
-  { id: 'src_nasscom', title: 'NASSCOM — industry body publications on GCCs in India', url: 'https://nasscom.in', source_type: 'report', publication_date: '2024', verification_status: 'verified', notes: 'Widely reported FY2024 figures: ~1,700 GCCs, ~1.66M workforce, ~US$46B revenue. Confirm against the latest NASSCOM–Zinnov report before citing.' },
-  { id: 'src_zinnov', title: 'Zinnov — GCC market intelligence', url: 'https://zinnov.com', source_type: 'report', publication_date: '2024', verification_status: 'verified', notes: 'Zinnov publishes the most-cited India GCC landscape reports.' },
-  { id: 'src_boeing_newsroom', title: 'Boeing newsroom — Bengaluru engineering & technology center', url: 'https://boeing.mediaroom.com', source_type: 'company_announcement', publication_date: '2024-01', verification_status: 'verified', notes: 'Boeing announced/opened its Bengaluru Engineering & Technology Center (BIETC) in January 2024; reported as its largest office outside the US.' },
-  { id: 'src_msft', title: 'Microsoft India — official website', url: 'https://www.microsoft.com/en-in', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: 'Microsoft India Development Center (IDC) operates from Hyderabad and Bengaluru; IDC Hyderabad dates to 1998.' },
-  { id: 'src_google', title: 'Google — official site', url: 'https://about.google', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: 'Google has engineering offices in Bengaluru, Hyderabad, Mumbai and Gurugram.' },
-  { id: 'src_amazon', title: 'Amazon India — about page', url: 'https://www.aboutamazon.in', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: 'Amazon operates large corporate/tech offices across Bengaluru, Hyderabad, Chennai, Pune, Mumbai and Delhi NCR.' },
-  { id: 'src_walmart', title: 'Walmart Global Tech India — official site', url: 'https://careers.walmart.com', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: 'Walmart Global Tech India is headquartered in Bengaluru.' },
-  { id: 'src_target', title: 'Target in India — official site', url: 'https://www.target.com/corporate', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: 'Target India (Bengaluru) established 2005; one of the earliest retail GCCs in India.' },
-  { id: 'src_tesco', title: 'Tesco — official site', url: 'https://www.tescoplc.com', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: 'Tesco Bengaluru established 2008; one of the largest retail service centers in India.' },
-  { id: 'src_sap', title: 'SAP Labs India — official site', url: 'https://www.sap.com', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: 'SAP Labs India established 1998 in Bengaluru; among the earliest large R&D centers in India.' },
-  { id: 'src_ti', title: 'Texas Instruments India — official site', url: 'https://www.ti.com', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: 'TI entered India in 1985; its Bengaluru center is one of the oldest semiconductor design centers in India.' },
-  { id: 'src_ge', title: 'GE — official site', url: 'https://www.ge.com', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: 'John F. Welch Technology Centre, Bengaluru, is GE\u2019s largest multi-disciplinary R&D center.' },
-  { id: 'src_boeing_alt', title: 'Boeing India — official site', url: 'https://www.boeing.in', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: '' },
-  { id: 'src_shell', title: 'Shell India — official site', url: 'https://www.shell.in', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: 'Shell Technology Center Bengaluru is Shell\u2019s largest digital/R&D hub outside the Netherlands/UK.' },
-  { id: 'src_optum', title: 'Optum India — official site', url: 'https://www.optum.in', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', notes: 'Optum India operates large offices across multiple cities; among the largest healthcare GCC employers in India.' },
-  { id: 'src_karnataka_gov', title: 'Government of Karnataka — official portal', url: 'https://karnataka.gov.in', source_type: 'government', publication_date: '2024', verification_status: 'unverified', notes: 'Karnataka GCC Policy 2024 was released by the state government; exact policy PDF link must be re-verified on the official portal.' },
-  { id: 'src_tn_gov', title: 'Government of Tamil Nadu — official portal', url: 'https://www.tn.gov.in', source_type: 'government', publication_date: '2025', verification_status: 'unverified', notes: 'Tamil Nadu GCC Policy announced 2025; verify details on the official portal / Guidance Tamil Nadu.' },
-  { id: 'src_kerala_gov', title: 'Government of Kerala — official portal', url: 'https://kerala.gov.in', source_type: 'government', publication_date: '2024', verification_status: 'unverified', notes: 'Kerala announced a dedicated GCC policy in 2024; verify details on the official portal.' },
-  { id: 'src_up_gov', title: 'Government of Uttar Pradesh — official portal', url: 'https://up.gov.in', source_type: 'government', publication_date: '2024', verification_status: 'unverified', notes: 'UP GCC Policy 2024 (Noida/Greater Noida focus) announced 2024; verify on official portal.' },
-  { id: 'src_telangana_gov', title: 'Government of Telangana — official portal', url: 'https://telangana.gov.in', source_type: 'government', publication_date: '2016', verification_status: 'unverified', notes: 'Telangana ICT Policy 2016–2021 has lapsed; newer GCC/AI initiatives announced since.' },
-  { id: 'src_maharashtra_gov', title: 'Government of Maharashtra — official portal', url: 'https://www.maharashtra.gov.in', source_type: 'government', publication_date: '2023', verification_status: 'unverified', notes: 'Maharashtra IT/ITes policy framework; verify current policy on official portal.' },
-  { id: 'src_et', title: 'The Economic Times — business news', url: 'https://economictimes.indiatimes.com', source_type: 'news', publication_date: null, verification_status: 'unverified', notes: 'Homepage provided; exact article links must be searched and re-verified before citation.' },
-  { id: 'src_hbl', title: 'The Hindu BusinessLine — business news', url: 'https://www.thehindubusinessline.com', source_type: 'news', publication_date: null, verification_status: 'unverified', notes: 'Homepage provided; exact article links must be searched and re-verified before citation.' },
-  { id: 'src_wiki_bmrcl', title: 'Wikipedia — Namma Metro', url: 'https://en.wikipedia.org/wiki/Namma_Metro', source_type: 'other', publication_date: null, verification_status: 'unverified', notes: 'Network length changes frequently; verify against BMRCL.' },
-  { id: 'src_wiki_hmrl', title: 'Wikipedia — Hyderabad Metro', url: 'https://en.wikipedia.org/wiki/Hyderabad_Metro', source_type: 'other', publication_date: null, verification_status: 'unverified', notes: '' },
-  { id: 'src_wiki_cmrl', title: 'Wikipedia — Chennai Metro', url: 'https://en.wikipedia.org/wiki/Chennai_Metro', source_type: 'other', publication_date: null, verification_status: 'unverified', notes: '' },
-  { id: 'src_wiki_pmrcl', title: 'Wikipedia — Pune Metro', url: 'https://en.wikipedia.org/wiki/Pune_Metro', source_type: 'other', publication_date: null, verification_status: 'unverified', notes: '' },
-  { id: 'src_wiki_mmrda', title: 'Wikipedia — Mumbai Metro', url: 'https://en.wikipedia.org/wiki/Mumbai_Metro', source_type: 'other', publication_date: null, verification_status: 'unverified', notes: '' },
-  { id: 'src_wiki_rmg', title: 'Wikipedia — Rapid Metro Gurgaon', url: 'https://en.wikipedia.org/wiki/Rapid_Metro_Gurgaon', source_type: 'other', publication_date: null, verification_status: 'unverified', notes: '' },
-  { id: 'src_wiki_dmrc', title: 'Wikipedia — Delhi Metro', url: 'https://en.wikipedia.org/wiki/Delhi_Metro', source_type: 'other', publication_date: null, verification_status: 'unverified', notes: 'Covers Noida segments (Blue Line, Aqua Line operated by NMRC).' },
-  { id: 'src_cbre', title: 'CBRE — India market reports', url: 'https://www.cbre.com', source_type: 'report', publication_date: null, verification_status: 'unverified', notes: 'Office rent figures are indicative midpoints from public market commentary; consult the latest CBRE/JLL India office reports.' },
-  { id: 'src_jll', title: 'JLL — India market reports', url: 'https://www.jll.com', source_type: 'report', publication_date: null, verification_status: 'unverified', notes: 'Office rent figures are indicative midpoints from public market commentary; consult the latest reports.' },
-  { id: 'src_ambitionbox', title: 'AmbitionBox — crowd-sourced salary data', url: 'https://www.ambitionbox.com', source_type: 'job_board', publication_date: null, verification_status: 'unverified', notes: 'Salary figures are indicative midpoints of commonly reported ranges; crowd-sourced and role-dependent.' },
-  { id: 'src_github_tcs', title: 'Placeholder — not used', url: 'https://example.com', source_type: 'other', publication_date: null, verification_status: 'stale', notes: 'Reserved placeholder demonstrating stale/conflicting status handling; not cited by any record.' },
+export interface SeedSource {
+  id: string; title: string; url: string; publisher: string | null;
+  source_type: 'news' | 'government' | 'company_announcement' | 'report' | 'job_board' | 'provider_website' | 'other';
+  publication_date: string | null; verification_status: 'verified' | 'unverified' | 'stale' | 'conflicting';
+  confidence_level: 'high' | 'medium' | 'low'; notes: string;
+}
+
+// Stable reference sources. Exact article URLs are used where verified during
+// Phase-1 research (see research/source-register.csv); otherwise publication
+// homepages + notes are used instead, marked accordingly.
+export const sources: SeedSource[] = [
+  { id: 'src_nasscom', title: 'Nasscom — industry body publications on GCCs in India', url: 'https://nasscom.in', publisher: 'Nasscom', source_type: 'report', publication_date: '2024', verification_status: 'verified', confidence_level: 'high', notes: 'FY2024 baseline widely cited: ~1,700 GCCs, ~1.9M workforce, ~US$64.6B revenue (Nasscom–Zinnov 5-year report, Sep 2024). Confirm against the latest report edition before citing exact figures.' },
+  { id: 'src_zinnov', title: 'Zinnov — GCC market intelligence (FY2026 landscape reached via Reuters/TOI coverage)', url: 'https://zinnov.com', publisher: 'Zinnov', source_type: 'report', publication_date: '2026-05', verification_status: 'verified', confidence_level: 'high', notes: 'FY2026: 2,117 GCCs, 3,728 units, 2.36M talent, ~US$98.4B revenue — figures cross-confirmed by Reuters (2026-05-06) and TOI (2026-05-07).' },
+  { id: 'src_boeing_newsroom', title: 'Boeing newsroom — Bengaluru engineering & technology center', url: 'https://boeing.mediaroom.com', publisher: 'Boeing', source_type: 'company_announcement', publication_date: '2024-01', verification_status: 'verified', confidence_level: 'medium', notes: 'Boeing announced/opened its Bengaluru Engineering & Technology Center (BIETC) in January 2024; reported as its largest office outside the US.' },
+  { id: 'src_msft', title: 'Microsoft India — official website', url: 'https://www.microsoft.com/en-in', publisher: 'Microsoft', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: 'Microsoft India Development Center (IDC) operates from Hyderabad and Bengaluru; IDC Hyderabad dates to 1998.' },
+  { id: 'src_google', title: 'Google — official site', url: 'https://about.google', publisher: 'Google', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: 'Google has engineering offices in Bengaluru, Hyderabad, Mumbai and Gurugram.' },
+  { id: 'src_amazon', title: 'Amazon India — about page', url: 'https://www.aboutamazon.in', publisher: 'Amazon', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: 'Amazon operates large corporate/tech offices across Bengaluru, Hyderabad, Chennai, Pune, Mumbai and Delhi NCR.' },
+  { id: 'src_walmart', title: 'Walmart Global Tech India — official site', url: 'https://careers.walmart.com', publisher: 'Walmart', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: 'Walmart Global Tech India is headquartered in Bengaluru.' },
+  { id: 'src_target', title: 'Target in India — official site', url: 'https://www.target.com/corporate', publisher: 'Target Corporation', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: 'Target India (Bengaluru) established 2005; one of the earliest retail GCCs in India.' },
+  { id: 'src_tesco', title: 'Tesco — official site', url: 'https://www.tescoplc.com', publisher: 'Tesco PLC', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: 'Tesco Bengaluru established 2008; one of the largest retail service centers in India.' },
+  { id: 'src_sap', title: 'SAP Labs India — official site', url: 'https://www.sap.com', publisher: 'SAP', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: 'SAP Labs India established 1998 in Bengaluru; among the earliest large R&D centers in India.' },
+  { id: 'src_ti', title: 'Texas Instruments India — official site', url: 'https://www.ti.com', publisher: 'Texas Instruments', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: 'TI entered India in 1985; its Bengaluru center is one of the oldest semiconductor design centers in India.' },
+  { id: 'src_ge', title: 'GE — official site', url: 'https://www.ge.com', publisher: 'GE', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: 'John F. Welch Technology Centre, Bengaluru, is GE\u2019s largest multi-disciplinary R&D center.' },
+  { id: 'src_boeing_alt', title: 'Boeing India — official site', url: 'https://www.boeing.in', publisher: 'Boeing', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: '' },
+  { id: 'src_shell', title: 'Shell India — official site', url: 'https://www.shell.in', publisher: 'Shell', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: 'Shell Technology Center Bengaluru is Shell\u2019s largest digital/R&D hub outside the Netherlands/UK.' },
+  { id: 'src_optum', title: 'Optum India — official site', url: 'https://www.optum.in', publisher: 'Optum (UnitedHealth Group)', source_type: 'company_announcement', publication_date: null, verification_status: 'verified', confidence_level: 'medium', notes: 'Optum India operates large offices across multiple cities; among the largest healthcare GCC employers in India.' },
+  { id: 'src_karnataka_gov', title: 'Karnataka GCC Policy 2024–2029 (official policy PDF)', url: 'https://eitbt.karnataka.gov.in/uploads/media_to_upload1732030878.pdf', publisher: 'Government of Karnataka (Electronics, IT, BT dept.)', source_type: 'government', publication_date: '2024-11-19', verification_status: 'verified', confidence_level: 'high', notes: 'Official policy document. Targets: 500 new GCCs (1,000 total by 2029), 3.5 lakh new jobs, US$50B output; Global Innovation Districts; beyond-Bengaluru incentives. Verified 2026-10 during Phase-1 research.' },
+  { id: 'src_tn_gov', title: 'Tamil Nadu GCC Payroll Subsidy Scheme (Government Order PDF)', url: 'https://tnswp.com/DIGIGOV/StaticAttachment?AttachmentFileName=/pdf/poli_noti/Go_1.pdf', publisher: 'Government of Tamil Nadu', source_type: 'government', publication_date: '2024-08', verification_status: 'verified', confidence_level: 'high', notes: 'Official G.O.: 30%/20%/10% payroll subsidy for years 1–3 on jobs paying over Rs.1,00,000/month; eligibility tied to Forbes Global 2000 / Fortune 1000 listing or 200+ jobs; GCCs facilitated in Coimbatore & Madurai. Verified 2026-10 during Phase-1 research.' },
+  { id: 'src_kerala_gov', title: 'Kerala Global Capability Centre Policy 2025 (draft, public consultation)', url: 'https://itmission.kerala.gov.in/', publisher: 'Government of Kerala (State IT Mission)', source_type: 'government', publication_date: '2025', verification_status: 'verified', confidence_level: 'medium', notes: 'Draft policy 2025-30, open for public feedback (also at infopark.in/gcc-policy). Targets reported: scale from ~40 GCCs toward 120 by 2030 (draft) and 150 GCCs / 2 lakh jobs by 2031 (Kerala GCC Outlook 2026 report) — both variants retained, never blended. Status remains draft until finalized.' },
+  { id: 'src_up_gov', title: 'Uttar Pradesh GCC Policy 2024 (final policy PDF)', url: 'https://invest.up.gov.in/wp-content/uploads/2025/06/GCC-Policy-Eng_050625.pdf', publisher: 'Government of Uttar Pradesh (Invest UP)', source_type: 'government', publication_date: '2025-06-05', verification_status: 'verified', confidence_level: 'high', notes: 'Finalized May 2025 (Rules 2025 approved Jan 2026): 2 lakh jobs target over 5 years; 30–50% land subsidy; 100% stamp duty exemption; 25% capital subsidy (Rs.10cr Level-1 / Rs.25cr Advanced); Rs.20,000 recruitment incentive per UP-domicile fresher. Verified 2026-10 during Phase-1 research.' },
+  { id: 'src_gujarat_gov', title: 'Gujarat Global Capability Center Policy 2025-30 (official booklet PDF)', url: 'https://dstpolicy.gujarat.gov.in/public/assets/gccpolicy/GCC_Policy_2025-30_Booklet.pdf', publisher: 'Government of Gujarat (Dept. of Science & Technology)', source_type: 'government', publication_date: '2025-02-11', verification_status: 'verified', confidence_level: 'high', notes: 'Launched at GIFT City. Targets: 250 new GCC units, 50,000+ jobs, Rs.10,000cr investment. One-time employment assist (50% of one-month CTC; caps Rs.50,000 male / Rs.60,000 female after 12 months), 7% interest subsidy (cap Rs.1cr), EPF reimbursement (100% female / 75% male). Verified 2026-10 during Phase-1 research.' },
+  { id: 'src_pib', title: 'Union Budget 2025-26 — National Framework for GCCs (PIB release)', url: 'https://pib.gov.in/PressReleasePage.aspx?PRID=2098387', publisher: 'Press Information Bureau, Government of India', source_type: 'government', publication_date: '2025-02-01', verification_status: 'verified', confidence_level: 'high', notes: 'Central budget proposed a National Framework for GCCs guiding states to promote GCCs in emerging tier-2 cities (16 measures: talent, infrastructure, byelaw reform, industry collaboration).' },
+  { id: 'src_telangana_gov', title: 'Government of Telangana — official portal', url: 'https://telangana.gov.in', publisher: 'Government of Telangana', source_type: 'government', publication_date: '2016', verification_status: 'unverified', confidence_level: 'low', notes: 'Telangana ICT Policy 2016–2021 has lapsed; newer GCC/AI initiatives (AI City proposal) announced since; verify current policy on official portal.' },
+  { id: 'src_maharashtra_gov', title: 'Government of Maharashtra — official portal', url: 'https://www.maharashtra.gov.in', publisher: 'Government of Maharashtra', source_type: 'government', publication_date: '2023', verification_status: 'unverified', confidence_level: 'low', notes: 'Maharashtra IT/ITes policy framework; dedicated GCC policy details must be verified on the official portal.' },
+  { id: 'src_et', title: 'The Economic Times — business news', url: 'https://economictimes.indiatimes.com', publisher: 'The Economic Times', source_type: 'news', publication_date: null, verification_status: 'unverified', confidence_level: 'low', notes: 'Homepage provided; exact article links must be searched and re-verified before citation.' },
+  { id: 'src_hbl', title: 'The Hindu BusinessLine — business news', url: 'https://www.thehindubusinessline.com', publisher: 'The Hindu BusinessLine', source_type: 'news', publication_date: null, verification_status: 'unverified', confidence_level: 'low', notes: 'Homepage provided; exact article links must be searched and re-verified before citation.' },
+  { id: 'src_wiki_bmrcl', title: 'Wikipedia — Namma Metro', url: 'https://en.wikipedia.org/wiki/Namma_Metro', publisher: 'Wikipedia', source_type: 'other', publication_date: null, verification_status: 'unverified', confidence_level: 'low', notes: 'Network length changes frequently; verify against BMRCL.' },
+  { id: 'src_wiki_hmrl', title: 'Wikipedia — Hyderabad Metro', url: 'https://en.wikipedia.org/wiki/Hyderabad_Metro', publisher: 'Wikipedia', source_type: 'other', publication_date: null, verification_status: 'unverified', confidence_level: 'low', notes: '' },
+  { id: 'src_wiki_cmrl', title: 'Wikipedia — Chennai Metro', url: 'https://en.wikipedia.org/wiki/Chennai_Metro', publisher: 'Wikipedia', source_type: 'other', publication_date: null, verification_status: 'unverified', confidence_level: 'low', notes: '' },
+  { id: 'src_wiki_pmrcl', title: 'Wikipedia — Pune Metro', url: 'https://en.wikipedia.org/wiki/Pune_Metro', publisher: 'Wikipedia', source_type: 'other', publication_date: null, verification_status: 'unverified', confidence_level: 'low', notes: '' },
+  { id: 'src_wiki_mmrda', title: 'Wikipedia — Mumbai Metro', url: 'https://en.wikipedia.org/wiki/Mumbai_Metro', publisher: 'Wikipedia', source_type: 'other', publication_date: null, verification_status: 'unverified', confidence_level: 'low', notes: '' },
+  { id: 'src_wiki_rmg', title: 'Wikipedia — Rapid Metro Gurgaon', url: 'https://en.wikipedia.org/wiki/Rapid_Metro_Gurgaon', publisher: 'Wikipedia', source_type: 'other', publication_date: null, verification_status: 'unverified', confidence_level: 'low', notes: '' },
+  { id: 'src_wiki_dmrc', title: 'Wikipedia — Delhi Metro', url: 'https://en.wikipedia.org/wiki/Delhi_Metro', publisher: 'Wikipedia', source_type: 'other', publication_date: null, verification_status: 'unverified', confidence_level: 'low', notes: 'Covers Noida segments (Blue Line, Aqua Line operated by NMRC).' },
+  { id: 'src_cbre', title: 'CBRE — India office market reports', url: 'https://www.cbre.com', publisher: 'CBRE South Asia', source_type: 'report', publication_date: null, verification_status: 'unverified', confidence_level: 'medium', notes: '2025 verified from public releases: GCCs ~39% of record 82.6 msf national leasing; ~35-40% forecast for 2026. Rent figures in city metrics remain indicative midpoints; consult the latest CBRE office reports for exact quarters.' },
+  { id: 'src_jll', title: 'JLL — India market reports', url: 'https://www.jll.com', publisher: 'JLL India', source_type: 'report', publication_date: null, verification_status: 'unverified', confidence_level: 'medium', notes: 'Office rent figures are indicative midpoints from public market commentary; consult the latest reports for exact quarters.' },
+  { id: 'src_ambitionbox', title: 'AmbitionBox — crowd-sourced salary data', url: 'https://www.ambitionbox.com', publisher: 'AmbitionBox', source_type: 'job_board', publication_date: null, verification_status: 'unverified', confidence_level: 'low', notes: 'Salary figures are indicative midpoints of commonly reported ranges; crowd-sourced and role-dependent.' },
+  { id: 'src_github_tcs', title: 'Placeholder — not used', url: 'https://example.com', publisher: 'Reserved placeholder', source_type: 'other', publication_date: null, verification_status: 'stale', confidence_level: 'low', notes: 'Reserved placeholder demonstrating stale/conflicting status handling; not cited by any record.' },
 ];
 
 export interface SeedCompanyLocation {
@@ -210,13 +220,143 @@ export const cityMetrics: SeedMetric[] = [
   est('loc_mumbai', 'entry_engineer_total_comp', 11, 'INR lakh/year', 'Indicative midpoint of commonly reported total compensation for entry-level software engineers.', 'src_ambitionbox', 'low'),
 ];
 
+// Policy records: status is backend-linked (draft | finalized | announced |
+// superseded) and every claim below traces to a Phase-1-verified source URL.
+// normalized_benefits rows follow {type, band_or_amount, eligibility_threshold, notes}
+// so the city-comparison view can render incentive matrices.
+interface NormalizedBenefit {
+  type: string;
+  band_or_amount: string;
+  eligibility_threshold?: string | null;
+  notes?: string | null;
+}
+
 export const policies = [
-  { id: 'pol_karnataka', title: 'Karnataka GCC Policy 2024', state: 'Karnataka', policy_type: 'incentive', description: 'Karnataka released a dedicated GCC policy in 2024 aiming to significantly grow the state\u2019s GCC base and jobs; reported targets include hundreds of new GCCs by the late 2020s, with a dedicated GCC facilitation cell.', benefits: JSON.stringify(['Reported target of ~500 new GCCs and ~3.5 lakh jobs by 2028 (as reported in press; verify in policy document)', 'Dedicated GCC cell for facilitation', 'Support for emerging-city clusters beyond Bengaluru']), eligibility_criteria: 'Verify eligibility in the official policy document.', effective_date: '2024', expiry_date: null, source_id: 'src_karnataka_gov', is_active: 1 },
-  { id: 'pol_tamilnadu', title: 'Tamil Nadu GCC Policy 2025', state: 'Tamil Nadu', policy_type: 'incentive', description: 'Tamil Nadu announced a dedicated GCC policy in 2025 with incentives for GCCs setting up in the state, promoted via Guidance Tamil Nadu; targets reported in the hundreds of new GCCs by 2030.', benefits: JSON.stringify(['Sector-specific incentives for GCCs', 'Single-window facilitation via Guidance Tamil Nadu', 'Support for cities beyond Chennai (Coimbatore, Madurai, Trichy)']), eligibility_criteria: 'Verify eligibility in the official policy document.', effective_date: '2025', expiry_date: null, source_id: 'src_tn_gov', is_active: 1 },
-  { id: 'pol_kerala', title: 'Kerala GCC Policy 2024', state: 'Kerala', policy_type: 'incentive', description: 'Kerala announced a dedicated GCC policy in 2024, among the first states to do so, offering incentives including subsidized office space and support for GCCs in Kochi and Thiruvananthapuram.', benefits: JSON.stringify(['Incentives for GCCs establishing in Kerala', 'Support via KSUM/Infopark/Technopark ecosystem']), eligibility_criteria: 'Verify eligibility in the official policy document.', effective_date: '2024', expiry_date: null, source_id: 'src_kerala_gov', is_active: 1 },
-  { id: 'pol_up', title: 'Uttar Pradesh GCC Policy 2024', state: 'Uttar Pradesh', policy_type: 'incentive', description: 'Uttar Pradesh announced a GCC policy in 2024 focused on Noida/Greater Noida, with reported incentives including land support and SGST-linked benefits for eligible GCCs.', benefits: JSON.stringify(['Reported land and SGST-linked incentives (verify in policy document)', 'Focus on Noida/Greater Noida ecosystem']), eligibility_criteria: 'Verify eligibility in the official policy document.', effective_date: '2024', expiry_date: null, source_id: 'src_up_gov', is_active: 1 },
-  { id: 'pol_maharashtra', title: 'Maharashtra IT/ITes policy framework', state: 'Maharashtra', policy_type: 'incentive', description: 'Maharashtra\u2019s IT/ITes policy framework supports technology operations in Mumbai, Pune and emerging Tier-2 cities; a dedicated GCC-focused policy has been discussed. Verify the current policy status.', benefits: JSON.stringify(['Stamp duty and other incentives for IT parks (verify current applicability)']), eligibility_criteria: 'Verify eligibility in the official policy document.', effective_date: '2023', expiry_date: null, source_id: 'src_maharashtra_gov', is_active: 1 },
-  { id: 'pol_telangana', title: 'Telangana ICT Policy 2016–2021 (lapsed)', state: 'Telangana', policy_type: 'incentive', description: 'Telangana\u2019s ICT Policy 2016 provided rebates and support for technology companies; the policy period has lapsed. Telangana has since announced newer initiatives (e.g., AI City proposals) targeting GCCs.', benefits: JSON.stringify(['Historical: reimbursement-linked incentives (lapsed)']), eligibility_criteria: 'Policy period lapsed.', effective_date: '2016', expiry_date: '2021', source_id: 'src_telangana_gov', is_active: 0 },
+  {
+    id: 'pol_karnataka', title: 'Karnataka GCC Policy 2024–2029', state: 'Karnataka', policy_type: 'incentive', status: 'finalized',
+    description: 'Official state policy (published 2024-11-19) targeting growth of the GCC base over five years with facilitation support and beyond-Bengaluru cluster incentives.',
+    benefits: JSON.stringify([
+      'Target: 500 new GCCs (1,000 total by 2029), 3.5 lakh new jobs, US$50B output',
+      'Global Innovation Districts + GCC facilitation cell',
+      'Incentive support for clusters beyond Bengaluru',
+    ]),
+    normalized_benefits: JSON.stringify([
+      { type: 'target_new_gccs', band_or_amount: '500 (to 1,000 total)', eligibility_threshold: null, notes: 'Policy period 2024-2029' } satisfies NormalizedBenefit,
+      { type: 'jobs_target', band_or_amount: '350,000', eligibility_threshold: null, notes: 'Policy period 2024-2029' } satisfies NormalizedBenefit,
+      { type: 'cluster_incentive', band_or_amount: 'Beyond-Bengaluru specific support', eligibility_threshold: 'Registered GCC unit in Karnataka', notes: 'Exact subsidy bands from policy document' } satisfies NormalizedBenefit,
+    ]),
+    eligibility_criteria: 'Registered GCC unit operating in Karnataka; sector/qualification details per official policy document.',
+    effective_date: '2024-11-19', expiry_date: null, source_id: 'src_karnataka_gov', is_active: 1,
+  },
+  {
+    id: 'pol_tamilnadu', title: 'Tamil Nadu GCC Payroll Subsidy Scheme', state: 'Tamil Nadu', policy_type: 'incentive', status: 'finalized',
+    description: 'Official Government Order establishing payroll-linked subsidies for GCC employment in Tamil Nadu, with facilitation extended via Guidance Tamil Nadu for cities beyond Chennai.',
+    benefits: JSON.stringify([
+      'Payroll subsidy: 30% (year 1), 20% (year 2), 10% (year 3) for jobs paying above Rs.1,00,000/month',
+      'Facilitation for GCCs in Coimbatore and Madurai',
+    ]),
+    normalized_benefits: JSON.stringify([
+      { type: 'payroll_subsidy', band_or_amount: '30% / 20% / 10% (years 1-3 of each qualifying job)', eligibility_threshold: 'Job salary > Rs.1,00,000/month', notes: 'Per qualifying employee; scheme terms per G.O.' } satisfies NormalizedBenefit,
+      { type: 'employer_eligibility', band_or_amount: 'Forbes Global 2000 or Fortune 1000 listing, or 200+ new jobs', eligibility_threshold: 'See G.O. definitions', notes: 'Applies to the establishment qualifying, not per job' } satisfies NormalizedBenefit,
+      { type: 'facilitation', band_or_amount: 'Guidance Tamil Nadu single-window support', eligibility_threshold: null, notes: 'Coimbatore & Madurai called out for GCC promotion' } satisfies NormalizedBenefit,
+    ]),
+    eligibility_criteria: 'Employer: Forbes Global 2000 / Fortune 1000 listing or commitment of 200+ applicable jobs. Employee: job paying over Rs.1,00,000/month.',
+    effective_date: '2024-08', expiry_date: null, source_id: 'src_tn_gov', is_active: 1,
+  },
+  {
+    id: 'pol_kerala', title: 'Kerala Global Capability Centre Policy 2025 (draft)', state: 'Kerala', policy_type: 'incentive', status: 'draft',
+    description: 'Draft policy 2025-30 in public consultation (State IT Mission). Anchored on Technopark (Thiruvananthapuram) and Infopark (Kochi) with a "GCC Boilerplate" single-point setup support model. NOTE: draft status — figures may change before finalization; targets reported in two versions (draft and later outlook) and are never blended here.',
+    benefits: JSON.stringify([
+      'Draft target: scale from ~40 GCCs toward 120 by 2030 (draft text); 150 GCCs / 2 lakh jobs by 2031 per later Kerala GCC Outlook 2026 report',
+      'GCC Boilerplate: SPOC teams in Technopark & Infopark for setup support',
+      'Skill/reskilling subsidies and incentives aligned with the National Framework',
+    ]),
+    normalized_benefits: JSON.stringify([
+      { type: 'target_gccs', band_or_amount: '120 by 2030 (draft) / 150 by 2031 (outlook report)', eligibility_threshold: null, notes: 'Two sources cited; both retained with years' } satisfies NormalizedBenefit,
+      { type: 'jobs_target', band_or_amount: '~200,000 assoc. jobs by 2030-31', eligibility_threshold: null, notes: 'As reported; draft-stage' } satisfies NormalizedBenefit,
+      { type: 'setup_support', band_or_amount: 'Dedicated SPOC teams at Infopark (Kochi) & Technopark (TVM)', eligibility_threshold: null, notes: 'GCC Boilerplate model' } satisfies NormalizedBenefit,
+    ]),
+    eligibility_criteria: 'Draft-stage; finalize eligibility when policy is notified.',
+    effective_date: '2025', expiry_date: null, source_id: 'src_kerala_gov', is_active: 1,
+  },
+  {
+    id: 'pol_up', title: 'Uttar Pradesh GCC Policy 2024 (finalized 2025)', state: 'Uttar Pradesh', policy_type: 'incentive', status: 'finalized',
+    description: 'Final policy implemented May 2025 (Rules 2025 approved January 2026), administered by Invest UP. Tiered definitions: Level-1 and Advanced GCC units with district-differentiated investment thresholds (Noida/Ghaziabad vs other cities).',
+    benefits: JSON.stringify([
+      '2 lakh+ jobs target over five years',
+      '30-50% land subsidy (by district), 100% stamp duty exemption',
+      '25% capital subsidy (Rs.10cr Level-1 / Rs.25cr Advanced caps)',
+      'SGST reimbursement + 5% interest subsidy',
+      'OPEX operational support up to Rs.40cr (Level-1) / Rs.80cr (Advanced)',
+      'Rs.20,000 recruitment incentive per UP-domicile fresher (1-year retention)',
+    ]),
+    normalized_benefits: JSON.stringify([
+      { type: 'land_subsidy', band_or_amount: '30% (Noida/Ghaziabad) to 50% (other districts)', eligibility_threshold: 'New GCC unit per policy definitions', notes: 'District-differentiated' } satisfies NormalizedBenefit,
+      { type: 'stamp_duty', band_or_amount: '100% exemption', eligibility_threshold: null, notes: '' } satisfies NormalizedBenefit,
+      { type: 'capital_subsidy', band_or_amount: '25%', eligibility_threshold: 'Up to Rs.10cr (Level-1) / Rs.25cr (Advanced)', notes: 'Level-1: Rs.15cr investment or 500 jobs outside NGB/Ghaziabad; Rs.20cr inside. Advanced: Rs.50cr/Rs.75cr with 1,000 employees' } satisfies NormalizedBenefit,
+      { type: 'opex_subsidy', band_or_amount: '20% of operational support, capped Rs.40cr (L1) / Rs.80cr (Advanced)', eligibility_threshold: null, notes: '' } satisfies NormalizedBenefit,
+      { type: 'recruitment_incentive', band_or_amount: 'Rs.20,000 per fresher', eligibility_threshold: 'UP-domicile employee; >=1 year continuous employment', notes: 'Annual recruitment floor applies per policy text' } satisfies NormalizedBenefit,
+      { type: 'sgst_reimbursement', band_or_amount: 'Per policy schedule', eligibility_threshold: null, notes: '' } satisfies NormalizedBenefit,
+      { type: 'interest_subsidy', band_or_amount: '5%', eligibility_threshold: null, notes: 'On eligible term loans' } satisfies NormalizedBenefit,
+    ]),
+    eligibility_criteria: 'Level-1: investment >=Rs.15cr or >=500 employees (outside Gautam Buddh Nagar/Ghaziabad; Rs.20cr inside those districts). Advanced: >=Rs.50cr (outside) / Rs.75cr (inside) plus >=1,000 employees.',
+    effective_date: '2025-05-06', expiry_date: null, source_id: 'src_up_gov', is_active: 1,
+  },
+  {
+    id: 'pol_gujarat', title: 'Gujarat Global Capability Center Policy 2025-30', state: 'Gujarat', policy_type: 'incentive', status: 'finalized',
+    description: 'Official policy launched 2025-02-11 at GIFT City. Complements GIFT IFSC benefits (tax regime, no GST, single-window) with state-level employment and capital incentives.',
+    benefits: JSON.stringify([
+      'Targets: 250 new GCC units, 50,000+ jobs, Rs.10,000cr investment',
+      'One-time employment assist: 50% of one-month CTC per eligible local hire retained 12+ months (caps Rs.50,000 male / Rs.60,000 female)',
+      '7% interest subsidy on term loans (cap Rs.1cr annually)',
+      'EPF reimbursement: 100% (female) / 75% (male) employer contribution for 5 years',
+      'Electricity duty reimbursement; skill reimbursement up to Rs.50,000 per course',
+    ]),
+    normalized_benefits: JSON.stringify([
+      { type: 'target_new_units', band_or_amount: '250', eligibility_threshold: null, notes: 'Policy period 2025-2030' } satisfies NormalizedBenefit,
+      { type: 'jobs_target', band_or_amount: '50,000', eligibility_threshold: null, notes: '' } satisfies NormalizedBenefit,
+      { type: 'employment_assist', band_or_amount: '50% of one-month CTC (Rs.50,000 male / Rs.60,000 female caps)', eligibility_threshold: 'New local hire retained >=12 months', notes: 'One-time per hire' } satisfies NormalizedBenefit,
+      { type: 'interest_subsidy', band_or_amount: '7% on term loans, cap Rs.1cr annually', eligibility_threshold: 'Eligible units per policy schedule', notes: '' } satisfies NormalizedBenefit,
+      { type: 'epf_reimbursement', band_or_amount: '100% (female) / 75% (male)', eligibility_threshold: '5-year window', notes: 'Employer contribution' } satisfies NormalizedBenefit,
+      { type: 'skilling_reimbursement', band_or_amount: 'Up to Rs.50,000 per qualifying course', eligibility_threshold: null, notes: '' } satisfies NormalizedBenefit,
+    ]),
+    eligibility_criteria: 'Non-mega: GFCI < Rs.250cr. Mega: GFCI >= Rs.250cr or >= 500 direct employees. Minimum 50 employees on payroll for new units.',
+    effective_date: '2025-02-11', expiry_date: null, source_id: 'src_gujarat_gov', is_active: 1,
+  },
+  {
+    id: 'pol_central_framework', title: 'National Framework for GCCs (Union Budget 2025-26, proposed)', state: 'Central Government', policy_type: 'infrastructure', status: 'announced',
+    description: 'Union Budget 2025-26 proposed a National Framework for GCCs guiding states to promote GCCs in emerging tier-2 cities via 16 measures including talent pipeline development, infrastructure audit, byelaw modernization and industry collaboration.',
+    benefits: JSON.stringify([
+      'National framework guiding tier-2 GCC expansion (16 measures)',
+      'MeitY industry committee convened (May 2025) incl. Nasscom/Zinnov/ANSR/KPMG for framework design',
+    ]),
+    normalized_benefits: JSON.stringify([
+      { type: 'framework', band_or_amount: '16 measures across talent/infrastructure/regulation/collaboration', eligibility_threshold: null, notes: 'Proposed in Budget 2025-26 speech; implementation details pending' } satisfies NormalizedBenefit,
+      { type: 'tier2_focus', band_or_amount: 'Explicit guidance for emerging tier-2 cities', eligibility_threshold: null, notes: 'Aligns with state policies (UP/Gujarat/Kerala/TN etc.)' } satisfies NormalizedBenefit,
+    ]),
+    eligibility_criteria: 'Framework stage — state-level operationalization pending; not an employer-facing incentive yet.',
+    effective_date: '2025-02-01', expiry_date: null, source_id: 'src_pib', is_active: 1,
+  },
+  {
+    id: 'pol_maharashtra', title: 'Maharashtra IT/ITes policy framework', state: 'Maharashtra', policy_type: 'incentive', status: 'announced',
+    description: 'Maharashtra\u2019s IT/ITes policy framework supports technology operations in Mumbai, Pune and emerging tier-2 cities; a dedicated GCC-focused policy has been discussed. Current dedicated-GCC parameters must be re-verified with the state portal.',
+    benefits: JSON.stringify(['Stamp duty and other incentives for IT parks (verify current applicability)']),
+    normalized_benefits: JSON.stringify([
+      { type: 'uncertain', band_or_amount: 'Not yet verified', eligibility_threshold: null, notes: 'Field intentionally not normalized until source verified — avoid presenting unverified bands' } satisfies NormalizedBenefit,
+    ]),
+    eligibility_criteria: 'Verify eligibility in the official policy documents.',
+    effective_date: '2023', expiry_date: null, source_id: 'src_maharashtra_gov', is_active: 1,
+  },
+  {
+    id: 'pol_telangana', title: 'Telangana ICT Policy 2016–2021 (lapsed)', state: 'Telangana', policy_type: 'incentive', status: 'superseded',
+    description: 'Telangana\u2019s ICT Policy 2016 provided rebates and support for technology companies; the policy period has lapsed. Telangana has since announced newer initiatives (e.g., AI City proposals) targeting GCCs.',
+    benefits: JSON.stringify(['Historical: reimbursement-linked incentives (lapsed)']),
+    normalized_benefits: JSON.stringify([
+      { type: 'historical', band_or_amount: 'Lapsed', eligibility_threshold: null, notes: 'Present for completeness; not actionable' } satisfies NormalizedBenefit,
+    ]),
+    eligibility_criteria: 'Policy period lapsed.',
+    effective_date: '2016', expiry_date: '2021', source_id: 'src_telangana_gov', is_active: 0,
+  },
 ];
 
 export const announcements = [
