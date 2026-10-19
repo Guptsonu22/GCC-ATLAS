@@ -128,9 +128,15 @@ export type ServiceProvider = Provider;
 export interface ProviderWithRelations extends Provider {
   headquarters_location?: Location;
   operating_location_objects?: Location[];
-  capability_list?: string[];
+  capability_list?: Capability[];
   case_study_list?: CaseStudy[];
   sources?: Source[];
+}
+
+export interface Capability {
+  capability: string;
+  source_id: string | null;
+  source_url?: string | null;
 }
 
 export interface CaseStudy {

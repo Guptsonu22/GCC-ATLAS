@@ -1,22 +1,22 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { createSavedResearchRepo } from '../repositories/saved-research';
-import { savedResearchCreateSchema, savedResearchUpdateSchema, parseOr400 } from '../utils/validation';
+import { savedResearchCreateSchema, savedResearchUpdateSchema, parseOr400, sessionKeySchema } from '../utils/validation';
 import type { Database } from 'sqlite';
 
 /**
- * Prototype note: there is no auth in this prototype; a fixed user id is used
- * and persisted to SQLite. Auth is a documented non-goal for this phase.
+ * Ownership strategy: the client generates a stable anonymous session key
+ * (uuid stored in localStorage) and sends it as `X-Session-Key`. Every
+ * list/read/update/delete is scoped to that key so data is never shared
+ * across browsers. A missing/invalid key is a 400, not a silent fallback.
  */
-const DEFAULT_USER_ID = 'prototype-user';
-
 export function savedResearchRoutes(db: Database): Router {
   const router = Router();
   const repo = createSavedResearchRepo(db);
 
   router.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
-      res.json({ data: await repo.listSaved(userId) });
+      const sessionKey = parseOr400(sessionKeySchema, req.headers['x-session-key']);
+      res.json({ data: await repo.listSaved(sessionKey) });
     } catch (err) {
       next(err);
     }
@@ -25,8 +25,8 @@ export function savedResearchRoutes(db: Database): Router {
   router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const input = parseOr400(savedResearchCreateSchema, req.body);
-      const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
-      const saved = await repo.createSaved({ user_id: userId, name: input.name, type: input.type, data: input.data });
+      const sessionKey = parseOr400(sessionKeySchema, req.headers['x-session-key']);
+      const saved = await repo.createSaved({ session_key: sessionKey, name: input.name, type: input.type, data: input.data });
       res.status(201).json(saved);
     } catch (err) {
       next(err);
@@ -35,8 +35,8 @@ export function savedResearchRoutes(db: Database): Router {
 
   router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
-      const saved = await repo.getSaved(req.params.id as string, userId);
+      const sessionKey = parseOr400(sessionKeySchema, req.headers['x-session-key']);
+      const saved = await repo.getSaved(req.params.id as string, sessionKey);
       if (!saved) {
         return void res.status(404).json({ error: { code: 'not_found', message: 'Saved item not found' } });
       }
@@ -49,8 +49,8 @@ export function savedResearchRoutes(db: Database): Router {
   router.patch('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const input = parseOr400(savedResearchUpdateSchema, req.body);
-      const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
-      const saved = await repo.updateSaved(req.params.id as string, userId, input);
+      const sessionKey = parseOr400(sessionKeySchema, req.headers['x-session-key']);
+      const saved = await repo.updateSaved(req.params.id as string, sessionKey, input);
       if (!saved) {
         return void res.status(404).json({ error: { code: 'not_found', message: 'Saved item not found' } });
       }
@@ -62,8 +62,8 @@ export function savedResearchRoutes(db: Database): Router {
 
   router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
-      const deleted = await repo.deleteSaved(req.params.id as string, userId);
+      const sessionKey = parseOr400(sessionKeySchema, req.headers['x-session-key']);
+      const deleted = await repo.deleteSaved(req.params.id as string, sessionKey);
       if (!deleted) {
         return void res.status(404).json({ error: { code: 'not_found', message: 'Saved item not found' } });
       }

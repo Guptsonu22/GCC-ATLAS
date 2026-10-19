@@ -90,7 +90,7 @@ export function createCompaniesRepo(db: Database) {
       [id],
     );
     company.sources = await db.all(
-      `SELECT s.* FROM company_sources cs JOIN sources s ON s.id = cs.source_id WHERE cs.company_id = ?`,
+      `SELECT s.* FROM company_sources cs JOIN source_records s ON s.id = cs.source_id WHERE cs.company_id = ?`,
       [id],
     );
     const announcements = await db.all('SELECT * FROM announcements WHERE company_id = ? ORDER BY announcement_date DESC', [id]);

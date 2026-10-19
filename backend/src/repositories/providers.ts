@@ -1,5 +1,6 @@
 import type { Database } from 'sqlite';
 import type { ProviderFilters, PaginatedResponse, ProviderWithRelations } from '../types';
+import type { Capability } from '../types';
 
 export function createProvidersRepo(db: Database) {
   async function listProviders(filters: ProviderFilters): Promise<PaginatedResponse<ProviderWithRelations>> {
@@ -16,10 +17,8 @@ export function createProvidersRepo(db: Database) {
       params.push(q, q, q);
     }
     if (filters.location_id) {
-      where.push('EXISTS (SELECT 1 FROM provider_sources ps WHERE ps.provider_id = p.id)'); // keep join valid; location filtering below
       // operating_locations is a JSON array; filter via LIKE on JSON text (acceptable for prototype)
-      where.pop();
-      where.push("(p.operating_locations LIKE ? OR p.headquarters_location_id = ?)");
+      where.push('(p.operating_locations LIKE ? OR p.headquarters_location_id = ?)');
       params.push(`%"${filters.location_id}"%`, filters.location_id);
     }
     if (typeof filters.is_verified === 'boolean') {
@@ -31,11 +30,11 @@ export function createProvidersRepo(db: Database) {
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.min(100, Math.max(1, filters.page_size ?? 20));
 
-    const totalRow = await db.get<{ n: number }>(`SELECT COUNT(*) AS n FROM providers p ${whereSql}`, params);
+    const totalRow = await db.get<{ n: number }>(`SELECT COUNT(*) AS n FROM service_providers p ${whereSql}`, params);
     const total = totalRow?.n ?? 0;
 
     const rows = await db.all(
-      `SELECT p.* FROM providers p ${whereSql} ORDER BY p.name ASC LIMIT ? OFFSET ?`,
+      `SELECT p.* FROM service_providers p ${whereSql} ORDER BY p.name ASC LIMIT ? OFFSET ?`,
       [...params, pageSize, (page - 1) * pageSize],
     );
 
@@ -47,7 +46,7 @@ export function createProvidersRepo(db: Database) {
     const items: ProviderWithRelations[] = [];
     for (const row of rows) {
       const provider: ProviderWithRelations = { ...row };
-      provider.capability_list = provider.capabilities ? JSON.parse(provider.capabilities) : [];
+      provider.capability_list = await loadCapabilities(provider.id);
       provider.case_study_list = provider.case_studies ? JSON.parse(provider.case_studies) : [];
       provider.operating_location_objects = provider.operating_locations
         ? await db.all(
@@ -59,7 +58,7 @@ export function createProvidersRepo(db: Database) {
         provider.headquarters_location = await db.get('SELECT * FROM locations WHERE id = ?', [provider.headquarters_location_id]);
       }
       provider.sources = await db.all(
-        'SELECT s.* FROM provider_sources ps JOIN sources s ON s.id = ps.source_id WHERE ps.provider_id = ?',
+        'SELECT s.* FROM provider_sources ps JOIN source_records s ON s.id = ps.source_id WHERE ps.provider_id = ?',
         [provider.id],
       );
       items.push(provider);
@@ -67,8 +66,23 @@ export function createProvidersRepo(db: Database) {
     return items;
   }
 
+  /** Normalized capabilities from the provider_capabilities table (Phase 3 refactor). */
+  async function loadCapabilities(providerId: string): Promise<Capability[]> {
+    const rows = (await db.all(
+      `SELECT c.capability, c.source_id, s.url AS source_url
+       FROM provider_capabilities c LEFT JOIN source_records s ON s.id = c.source_id
+       WHERE c.provider_id = ? ORDER BY c.capability ASC`,
+      [providerId],
+    )) as { capability: string; source_id: string | null; source_url: string | null }[];
+    return rows.map((r) => ({
+      capability: r.capability,
+      source_id: r.source_id,
+      source_url: r.source_url ?? null,
+    }));
+  }
+
   async function getProvider(id: string): Promise<ProviderWithRelations | null> {
-    const row = await db.get('SELECT * FROM providers WHERE id = ?', [id]);
+    const row = await db.get('SELECT * FROM service_providers WHERE id = ?', [id]);
     if (!row) return null;
     const [provider] = await hydrateMany([row as ProviderWithRelations]);
     return provider ?? null;

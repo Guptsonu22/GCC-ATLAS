@@ -29,8 +29,19 @@ export const sourceFiltersSchema = z.object({
   query: z.string().trim().max(200).optional(),
   source_type: z.enum(['news', 'government', 'company_announcement', 'report', 'job_board', 'provider_website', 'other']).optional(),
   verification_status: z.enum(['verified', 'unverified', 'stale', 'conflicting']).optional(),
+  confidence_level: z.enum(['high', 'medium', 'low']).optional(),
   page: z.coerce.number().int().min(1).optional(),
   page_size: z.coerce.number().int().min(1).max(100).optional(),
+});
+
+export const policyFiltersSchema = z.object({
+  state: z.string().trim().max(100).optional(),
+  status: z.enum(['draft', 'finalized', 'announced', 'superseded']).optional(),
+  policy_type: z.enum(['incentive', 'regulation', 'infrastructure', 'talent', 'tax', 'land', 'other']).optional(),
+  active_only: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === 'true')),
 });
 
 export const announcementFiltersSchema = z.object({
@@ -63,6 +74,29 @@ export const savedResearchCreateSchema = z.object({
 export const savedResearchUpdateSchema = z.object({
   name: z.string().trim().min(1).max(200).optional(),
   data: z.unknown().optional(),
+});
+
+/**
+ * Anonymous-session ownership strategy: clients generate a stable session key
+ * (localStorage uuid) and send it as `X-Session-Key` on every saved-record
+ * request. All saved reads/writes are scoped to that key, so records are never
+ * exposed across different users/browsers.
+ */
+export const sessionKeySchema = z
+  .string()
+  .min(8, 'X-Session-Key must be at least 8 characters')
+  .max(64, 'X-Session-Key must be at most 64 characters')
+  .regex(/^[A-Za-z0-9_-]+$/, 'X-Session-Key may only contain letters, digits, dashes and underscores');
+
+export const savedComparisonCreateSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  location_ids: z
+    .array(z.string().trim().min(1).max(60))
+    .min(2, 'A comparison needs at least 2 locations')
+    .max(4, 'A comparison supports at most 4 locations')
+    .refine((arr) => new Set(arr).size === arr.length, 'location_ids must be distinct'),
+  metric_names: z.array(z.string().trim().min(1).max(120)).max(20).optional(),
+  notes: z.string().trim().max(2000).optional(),
 });
 
 export function parseOr400<T extends z.ZodType>(schema: T, input: unknown): z.infer<T> {

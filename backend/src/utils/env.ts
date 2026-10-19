@@ -11,6 +11,12 @@
  */
 import { z } from 'zod';
 
+const blankable = <T extends z.ZodTypeAny>(schema: T) =>
+  z
+    .union([z.literal(''), schema])
+    .optional()
+    .transform((v) => (v === '' ? undefined : v));
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce
@@ -21,9 +27,9 @@ const envSchema = z.object({
     .default(4000),
   DB_PATH: z.string().trim().min(1).default(':memory:'),
   CORS_ORIGIN: z.string().trim().min(1).default('*'),
-  AI_API_KEY: z.string().trim().min(8).optional(),
-  AI_BASE_URL: z.string().url().optional(),
-  AI_MODEL: z.string().trim().min(1).optional(),
+  AI_API_KEY: blankable(z.string().min(8, 'AI_API_KEY must be at least 8 characters').max(400)),
+  AI_BASE_URL: blankable(z.string().url('AI_BASE_URL must be a valid URL')),
+  AI_MODEL: blankable(z.string().min(1).max(200)),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
