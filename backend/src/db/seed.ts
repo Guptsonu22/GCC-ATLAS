@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { getDatabase, closeDatabase, initializeSchema, newId } from './database';
 import type { Database } from 'sqlite';
 import {

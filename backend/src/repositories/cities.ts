@@ -1,5 +1,4 @@
 import type { Database } from 'sqlite';
-import { newId } from '../db/database';
 
 export function createCitiesRepo(db: Database) {
   async function listLocations() {

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { type ErrorRequestHandler } from 'express';
 import cors, { type CorsOptions } from 'cors';
 import { getDatabase, closeDatabase } from './db/database';
