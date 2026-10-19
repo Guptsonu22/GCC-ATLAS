@@ -1,35 +1,55 @@
-import Database from 'better-sqlite3';
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import sqlite3 from 'sqlite3';
+import { open, Database } from 'sqlite';
+import { readFileSync, mkdirSync, existsSync } from 'fs';
+import { resolve } from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+let db: Database | null = null;
 
-const dbPath = process.env.DB_PATH || join(__dirname, '..', '..', 'data', 'gcc-atlas.db');
-
-let db: Database.Database | null = null;
-
-export function getDatabase(): Database.Database {
+/**
+ * SQLite is used for the prototype. NOTE: better-sqlite3 was preferred but
+ * failed to compile on this Windows machine (no MSVC build tools), so we use
+ * the `sqlite3` driver behind the promise-based `sqlite` wrapper instead.
+ * The repository layer keeps SQL isolated so migration to PostgreSQL is possible.
+ */
+export async function getDatabase(): Promise<Database> {
   if (!db) {
-    db = new Database(dbPath);
-    db.pragma('foreign_keys = ON');
-    db.pragma('journal_mode = WAL');
-    initializeSchema(db);
+    const dbPath = process.env.DB_PATH || resolve(process.cwd(), 'data', 'gcc-atlas.db');
+    if (dbPath !== ':memory:') {
+      mkdirSync(resolve(dbPath, '..'), { recursive: true });
+    }
+    db = await open({ filename: dbPath, driver: sqlite3.Database });
+    await db.exec('PRAGMA foreign_keys = ON;');
+    await initializeSchema(db);
   }
   return db;
 }
 
-function initializeSchema(database: Database.Database): void {
-  const schemaPath = join(__dirname, 'schema.sql');
+export async function initializeSchema(database: Database): Promise<void> {
+  const schemaPath = findSchemaPath();
   const schema = readFileSync(schemaPath, 'utf-8');
-  database.exec(schema);
+  await database.exec(schema);
 }
 
-export function closeDatabase(): void {
+function findSchemaPath(): string {
+  const candidates = [
+    resolve(__dirname, 'schema.sql'),
+    resolve(__dirname, '../../src/db/schema.sql'),
+    resolve(process.cwd(), 'src/db/schema.sql'),
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
+  throw new Error(`schema.sql not found; tried: ${candidates.join(', ')}`);
+}
+
+export async function closeDatabase(): Promise<void> {
   if (db) {
-    db.close();
+    await db.close();
     db = null;
   }
+}
+
+export function newId(prefix: string): string {
+  const raw = globalThis.crypto.randomUUID();
+  return `${prefix}_${raw.replace(/-/g, '').slice(0, 12)}`;
 }
