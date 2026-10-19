@@ -48,6 +48,15 @@ function metaRoutes(db) {
             next(err);
         }
     });
+    // Sectors
+    router.get('/sectors', async (_req, res, next) => {
+        try {
+            res.json({ data: await policiesRepo.listSectors() });
+        }
+        catch (err) {
+            next(err);
+        }
+    });
     // Announcements
     router.get('/announcements', async (req, res, next) => {
         try {

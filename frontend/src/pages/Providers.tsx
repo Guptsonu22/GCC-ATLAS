@@ -1,13 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Search, X, ChevronLeft, ChevronRight, MapPin, CheckCircle2, ExternalLink, ShieldCheck, SparkleOff } from 'lucide-react';
-import { z } from 'zod';
+import { Search, X, ChevronLeft, ChevronRight, MapPin, CheckCircle2, ExternalLink, ShieldCheck, ClipboardList } from 'lucide-react';
+
 import { api } from '../services/client';
-import { providersResponseSchema, providerSchema, type Provider } from '../services/schemas';
-import { Panel, PanelHeader, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
+import { providersResponseSchema, type Provider } from '../services/schemas';
+import { Panel, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
-const providerDetailSchema = z.object(providerSchema.shape);
 const categories = [
   { id: '', label: 'All categories' },
   { id: 'consulting', label: 'GCC consulting & setup' },
@@ -203,7 +202,7 @@ function ProviderDrawer({ provider, onClose }: { provider: Provider; onClose: ()
 
           <section>
             <h3 className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-400">
-              <SparkleOff className="h-3.5 w-3.5" /> Case studies & reviews
+              <ClipboardList className="h-3.5 w-3.5" /> Case studies & reviews
             </h3>
             <div className="rounded border border-border bg-surface-850 px-3 py-2.5">
               <p className="text-xs leading-relaxed text-ink-400">

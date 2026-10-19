@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Search, X, ChevronLeft, ChevronRight, ArrowUpDown, ExternalLink, FileText, MapPin } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, ArrowUpDown, MapPin } from 'lucide-react';
 import { z } from 'zod';
 import { api } from '../services/client';
 import { companiesResponseSchema, sectorSchema, locationSchema, type Company } from '../services/schemas';

@@ -1,16 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Plus, X, Scale, ExternalLink, Info, TrendingDown, Check } from 'lucide-react';
+import { Plus, Scale, ExternalLink, Info, TrendingDown, Check } from 'lucide-react';
 import { z } from 'zod';
 import { api } from '../services/client';
-import { locationSchema, cityDetailSchema, cityMetricSchema } from '../services/schemas';
+import { cityDetailSchema } from '../services/schemas';
 import type { CityDetail, CityMetric } from '../services/schemas';
 import { Panel, PanelHeader, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
-const citiesListSchema = z.object({ data: z.array(cityDetailSchema) });
-const compareSchema = z.object({ data: z.array(cityDetailSchema) });
 const cityDetailResponseSchema = z.object({ data: z.array(cityDetailSchema) });
+const compareSchema = z.object({ data: z.array(cityDetailSchema) });
 
 const METRIC_LABELS: Record<string, string> = {
   gcc_count_estimated: 'Estimated GCC count',
@@ -21,7 +20,6 @@ const METRIC_LABELS: Record<string, string> = {
   entry_engineer_total_comp: 'Entry engineer comp (indicative)',
 };
 
-const DEFAULT_CITY_IDS = ['loc_bengaluru', 'loc_hyderabad', 'loc_pune', 'loc_chennai', 'loc_gurugram', 'loc_mumbai'];
 const MAX_COMPARE = 4;
 
 export function CitiesPage() {

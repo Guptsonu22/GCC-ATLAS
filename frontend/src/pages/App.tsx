@@ -1,16 +1,15 @@
-import { useEffect } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Shell } from './components/Shell';
-import { DashboardPage } from './pages/Dashboard';
-import { ExplorerPage } from './pages/Explorer';
-import { CitiesPage } from './pages/Cities';
-import { ProvidersPage } from './pages/Providers';
-import { AssistantPage } from './pages/Assistant';
-import { SourcesPage } from './pages/Sources';
-import { SavedPage } from './pages/Saved';
-import { NotFoundPage } from './pages/NotFound';
-import { useDocumentTitle } from './hooks/useDocumentTitle';
+import { Shell } from '../components/Shell';
+import { DashboardPage } from './Dashboard';
+import { ExplorerPage } from './Explorer';
+import { CitiesPage } from './Cities';
+import { ProvidersPage } from './Providers';
+import { AssistantPage } from './Assistant';
+import { SourcesPage } from './Sources';
+import { SavedPage } from './Saved';
+import { NotFoundPage } from './NotFound';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 const queryClient = new QueryClient({
   defaultOptions: {

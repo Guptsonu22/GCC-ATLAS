@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const sourceSchema = z.object({
+export const sourceSchema = z.object({
   id: z.string(),
   title: z.string(),
   url: z.string(),
