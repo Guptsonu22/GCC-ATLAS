@@ -181,12 +181,19 @@ function ProviderDrawer({ provider, onClose }: { provider: Provider; onClose: ()
           <section>
             <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-400">Capabilities</h3>
             <div className="flex flex-wrap gap-1.5">
-              {(provider.capability_list ?? provider.capabilities?.length ? safeJsonList(provider.capabilities) : []).map((c) => (
-                <Badge key={c} tone="teal">{c}</Badge>
-              ))}
-              {(provider.capability_list ?? safeJsonList(provider.capabilities)).length === 0 ? (
+              {capabilityList(provider).length === 0 ? (
                 <p className="text-xs text-ink-400">Not available — capabilities not collected for this provider yet.</p>
-              ) : null}
+              ) : (
+                capabilityList(provider).map((c) => (
+                  <span
+                    key={c.text}
+                    title={c.sourceUrl ? `Source: ${c.sourceUrl}` : undefined}
+                    className="rounded border border-teal-accent/25 bg-teal-accent/10 px-1.5 py-0.5 text-[11px] text-teal-accent"
+                  >
+                    {c.text}
+                  </span>
+                ))
+              )}
             </div>
           </section>
 
@@ -231,12 +238,14 @@ function ProviderDrawer({ provider, onClose }: { provider: Provider; onClose: ()
   );
 }
 
-function safeJsonList(json: string | null | undefined): string[] {
-  if (!json) return [];
-  try {
-    const parsed: unknown = JSON.parse(json);
-    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
-  } catch {
-    return [];
-  }
+/** capability_list items may be {capability, source_url} (normalized) or plain strings. */
+function capabilityList(provider: Provider): { text: string; sourceUrl?: string | null }[] {
+  const items = provider.capability_list ?? [];
+  return items
+    .map((item) =>
+      typeof item === 'string'
+        ? { text: item, sourceUrl: null }
+        : { text: item.capability, sourceUrl: item.source_url ?? null },
+    )
+    .filter((c): c is { text: string; sourceUrl: string | null } => c.text.length > 0);
 }
