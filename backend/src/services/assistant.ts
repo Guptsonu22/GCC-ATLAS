@@ -15,6 +15,7 @@ import type { AIQueryRequest, AIQueryResponse, Citation } from '../types';
 
 interface Retrieved {
   companies: Record<string, unknown>[];
+  related_companies: Record<string, unknown>[];
   cities: Record<string, unknown>[];
   metrics: Record<string, unknown>[];
   policies: Record<string, unknown>[];
@@ -87,8 +88,14 @@ export function createAssistantService(db: Database) {
     )) as Record<string, unknown>[];
 
     return {
-      companies: allCompanies.filter(
-        (c) => matches(c.name as string) || matches(c.parent_company as string) || matches(c.sector_name as string),
+      // Strong evidence: matched by company name, parent company, or city/state.
+      companies: allCompanies.filter((c) => matches(c.name as string) || matches(c.parent_company as string)),
+      // Weak/related: matched only via sector keyword — displayed but never
+      // counted as sufficient evidence.
+      related_companies: allCompanies.filter(
+        (c) =>
+          !(matches(c.name as string) || matches(c.parent_company as string)) &&
+          matches(c.sector_name as string),
       ),
       cities: allCities.filter((c) => matches(c.name as string) || matches(c.state as string)),
       metrics,
@@ -178,9 +185,7 @@ export function createAssistantService(db: Database) {
       for (const c of retrieved.companies.slice(0, 6)) {
         parts.push(`- **${c.name}** (${c.sector_name ?? 'sector n/a'}) — status: ${c.operating_status}${c.india_entry_year ? `, in India since ${c.india_entry_year}` : ''}. ${c.description ?? ''}`);
       }
-    }
-
-    if (retrieved.policies.length) {
+    }    if (retrieved.policies.length) {
       parts.push(`### Relevant policies (${retrieved.policies.length})`);
       for (const p of retrieved.policies.slice(0, 4)) {
         parts.push(`- **${p.title}** (${p.state}, ${p.effective_date ?? 'n/a'}, ${p.is_active ? 'active' : 'lapsed'}): ${p.description ?? ''}`);
@@ -197,7 +202,20 @@ export function createAssistantService(db: Database) {
       }
     }
 
-    const insufficient = parts.length === 0;
+    if (retrieved.related_companies.length) {
+      parts.push(`### Possibly related companies (matched by sector keyword only)`);
+      for (const c of retrieved.related_companies.slice(0, 5)) {
+        parts.push(`- **${c.name}** (${c.sector_name ?? 'sector n/a'}) — ${c.description ?? ''}`);
+      }
+    }
+
+    const strongEvidence =
+      retrieved.cities.length > 0 ||
+      retrieved.companies.length > 0 ||
+      retrieved.policies.length > 0 ||
+      retrieved.announcements.length > 0;
+
+    const insufficient = !strongEvidence;
     if (insufficient) {
       parts.push('I could not find sufficient evidence in the GCC Atlas dataset to answer this question.');
       parts.push('');
