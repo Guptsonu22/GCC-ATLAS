@@ -5,17 +5,18 @@ const express_1 = require("express");
 const saved_research_1 = require("../repositories/saved-research");
 const validation_1 = require("../utils/validation");
 /**
- * Prototype note: there is no auth in this prototype; a fixed user id is used
- * and persisted to SQLite. Auth is a documented non-goal for this phase.
+ * Ownership strategy: the client generates a stable anonymous session key
+ * (uuid stored in localStorage) and sends it as `X-Session-Key`. Every
+ * list/read/update/delete is scoped to that key so data is never shared
+ * across browsers. A missing/invalid key is a 400, not a silent fallback.
  */
-const DEFAULT_USER_ID = 'prototype-user';
 function savedResearchRoutes(db) {
     const router = (0, express_1.Router)();
     const repo = (0, saved_research_1.createSavedResearchRepo)(db);
     router.get('/', async (req, res, next) => {
         try {
-            const userId = req.headers['x-user-id'] || DEFAULT_USER_ID;
-            res.json({ data: await repo.listSaved(userId) });
+            const sessionKey = (0, validation_1.parseOr400)(validation_1.sessionKeySchema, req.headers['x-session-key']);
+            res.json({ data: await repo.listSaved(sessionKey) });
         }
         catch (err) {
             next(err);
@@ -24,8 +25,8 @@ function savedResearchRoutes(db) {
     router.post('/', async (req, res, next) => {
         try {
             const input = (0, validation_1.parseOr400)(validation_1.savedResearchCreateSchema, req.body);
-            const userId = req.headers['x-user-id'] || DEFAULT_USER_ID;
-            const saved = await repo.createSaved({ user_id: userId, name: input.name, type: input.type, data: input.data });
+            const sessionKey = (0, validation_1.parseOr400)(validation_1.sessionKeySchema, req.headers['x-session-key']);
+            const saved = await repo.createSaved({ session_key: sessionKey, name: input.name, type: input.type, data: input.data });
             res.status(201).json(saved);
         }
         catch (err) {
@@ -34,8 +35,8 @@ function savedResearchRoutes(db) {
     });
     router.get('/:id', async (req, res, next) => {
         try {
-            const userId = req.headers['x-user-id'] || DEFAULT_USER_ID;
-            const saved = await repo.getSaved(req.params.id, userId);
+            const sessionKey = (0, validation_1.parseOr400)(validation_1.sessionKeySchema, req.headers['x-session-key']);
+            const saved = await repo.getSaved(req.params.id, sessionKey);
             if (!saved) {
                 return void res.status(404).json({ error: { code: 'not_found', message: 'Saved item not found' } });
             }
@@ -48,8 +49,8 @@ function savedResearchRoutes(db) {
     router.patch('/:id', async (req, res, next) => {
         try {
             const input = (0, validation_1.parseOr400)(validation_1.savedResearchUpdateSchema, req.body);
-            const userId = req.headers['x-user-id'] || DEFAULT_USER_ID;
-            const saved = await repo.updateSaved(req.params.id, userId, input);
+            const sessionKey = (0, validation_1.parseOr400)(validation_1.sessionKeySchema, req.headers['x-session-key']);
+            const saved = await repo.updateSaved(req.params.id, sessionKey, input);
             if (!saved) {
                 return void res.status(404).json({ error: { code: 'not_found', message: 'Saved item not found' } });
             }
@@ -61,8 +62,8 @@ function savedResearchRoutes(db) {
     });
     router.delete('/:id', async (req, res, next) => {
         try {
-            const userId = req.headers['x-user-id'] || DEFAULT_USER_ID;
-            const deleted = await repo.deleteSaved(req.params.id, userId);
+            const sessionKey = (0, validation_1.parseOr400)(validation_1.sessionKeySchema, req.headers['x-session-key']);
+            const deleted = await repo.deleteSaved(req.params.id, sessionKey);
             if (!deleted) {
                 return void res.status(404).json({ error: { code: 'not_found', message: 'Saved item not found' } });
             }

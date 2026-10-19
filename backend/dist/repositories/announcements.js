@@ -30,7 +30,7 @@ function createAnnouncementsRepo(db) {
        FROM announcements a
        LEFT JOIN companies c ON c.id = a.company_id
        LEFT JOIN locations l ON l.id = a.location_id
-       LEFT JOIN sources s ON s.id = a.source_id
+       LEFT JOIN source_records s ON s.id = a.source_id
        ${whereSql} ORDER BY a.announcement_date DESC LIMIT ? OFFSET ?`, [...params, pageSize, (page - 1) * pageSize]);
         return { data: rows, total, page, page_size: pageSize, total_pages: Math.max(1, Math.ceil(total / pageSize)) };
     }

@@ -5,20 +5,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createApp = createApp;
 exports.startServer = startServer;
+require("dotenv/config");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const database_1 = require("./db/database");
 const seed_1 = require("./db/seed");
+const env_1 = require("./utils/env");
+const request_logger_1 = require("./middleware/request-logger");
 const companies_1 = require("./routes/companies");
 const cities_1 = require("./routes/cities");
 const providers_1 = require("./routes/providers");
 const meta_1 = require("./routes/meta");
 const assistant_1 = require("./routes/assistant");
 const saved_research_1 = require("./routes/saved-research");
+const saved_comparisons_1 = require("./routes/saved-comparisons");
 async function createApp() {
+    const env = (0, env_1.loadEnv)();
     const app = (0, express_1.default)();
-    app.use((0, cors_1.default)({ origin: process.env.CORS_ORIGIN || '*' }));
+    app.use((0, cors_1.default)(buildCorsOptions(env.CORS_ORIGIN)));
     app.use(express_1.default.json({ limit: '1mb' }));
+    app.use((0, request_logger_1.requestLogger)(env.NODE_ENV));
     const db = await (0, database_1.getDatabase)();
     await (0, seed_1.ensureSeeded)();
     app.use('/api/companies', (0, companies_1.companiesRoutes)(db));
@@ -26,6 +32,7 @@ async function createApp() {
     app.use('/api/providers', (0, providers_1.providersRoutes)(db));
     app.use('/api/assistant', (0, assistant_1.assistantRoutes)(db));
     app.use('/api/saved-research', (0, saved_research_1.savedResearchRoutes)(db));
+    app.use('/api/saved-comparisons', (0, saved_comparisons_1.savedComparisonsRoutes)(db));
     app.use('/api', (0, meta_1.metaRoutes)(db));
     app.use((_req, res) => {
         res.status(404).json({ error: { code: 'not_found', message: 'Route not found' } });
@@ -45,11 +52,22 @@ async function createApp() {
     app.use(errorHandler);
     return app;
 }
+/** "http://a,b" -> exact-origin allowlist; "*" -> open CORS (dev only). */
+function buildCorsOptions(raw) {
+    const parsed = (0, env_1.parseCorsOrigin)(raw);
+    return {
+        origin: parsed.open ? true : parsed.origins.length === 1 ? parsed.origins[0] : parsed.origins,
+        methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Session-Key'],
+        maxAge: 600,
+    };
+}
 async function startServer() {
+    const env = (0, env_1.loadEnv)();
     const app = await createApp();
-    const port = Number(process.env.PORT) || 4000;
-    const server = app.listen(port, () => {
-        console.log(`GCC Atlas API listening on http://localhost:${port}`);
+    const server = app.listen(env.PORT, () => {
+        const mode = env.AI_API_KEY ? 'llm' : 'demo';
+        console.log(`GCC Atlas API listening on http://localhost:${env.PORT} (env: ${env.NODE_ENV}, assistant: ${mode})`);
     });
     const shutdown = async () => {
         server.close();

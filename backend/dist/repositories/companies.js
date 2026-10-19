@@ -71,7 +71,7 @@ function createCompaniesRepo(db) {
         company.sector = company.sector_id ? { id: company.sector_id, name: company.sector_name ?? '', description: null, created_at: '', updated_at: '' } : undefined;
         company.locations = await db.all(`SELECT cl.*, l.name AS location_name, l.state AS location_state FROM company_locations cl
        JOIN locations l ON l.id = cl.location_id WHERE cl.company_id = ? ORDER BY cl.is_primary DESC, l.name ASC`, [id]);
-        company.sources = await db.all(`SELECT s.* FROM company_sources cs JOIN sources s ON s.id = cs.source_id WHERE cs.company_id = ?`, [id]);
+        company.sources = await db.all(`SELECT s.* FROM company_sources cs JOIN source_records s ON s.id = cs.source_id WHERE cs.company_id = ?`, [id]);
         const announcements = await db.all('SELECT * FROM announcements WHERE company_id = ? ORDER BY announcement_date DESC', [id]);
         company.announcements = announcements;
         return company;

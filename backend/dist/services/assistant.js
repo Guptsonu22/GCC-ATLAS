@@ -35,17 +35,17 @@ function createAssistantService(db) {
         const metrics = matchedCityIds.length
             ? (await db.all(`SELECT m.*, l.name AS city_name, s.title AS source_title, s.url AS source_url, s.verification_status
            FROM city_metrics m JOIN locations l ON l.id = m.location_id
-           LEFT JOIN sources s ON s.id = m.source_id
+           LEFT JOIN source_records s ON s.id = m.source_id
            WHERE m.location_id IN (${matchedCityIds.map(() => '?').join(',')})`, matchedCityIds))
             : [];
-        const policies = (await db.all(`SELECT p.*, s.title AS source_title, s.url AS source_url FROM policies p
-       LEFT JOIN sources s ON s.id = p.source_id`));
+        const policies = (await db.all(`SELECT p.*, s.title AS source_title, s.url AS source_url, s.publisher AS source_publisher FROM policy_records p
+       LEFT JOIN source_records s ON s.id = p.source_id`));
         const announcements = (await db.all(`SELECT a.id, a.title, a.summary, a.announcement_type, a.announcement_date, a.is_verified,
               c.name AS company_name, l.name AS location_name, s.title AS source_title, s.url AS source_url
        FROM announcements a
        LEFT JOIN companies c ON c.id = a.company_id
        LEFT JOIN locations l ON l.id = a.location_id
-       LEFT JOIN sources s ON s.id = a.source_id
+       LEFT JOIN source_records s ON s.id = a.source_id
        ORDER BY a.announcement_date DESC`));
         return {
             // Strong evidence: matched by company name, parent company, or city/state.
@@ -229,7 +229,7 @@ function createAssistantService(db) {
         if (!answer)
             throw new Error('LLM returned an empty response');
         const usedSourceIds = [...answer.matchAll(/\[src:([a-z0-9_]+)\]/gi)].map((m) => m[1]);
-        const allSources = await db.all(`SELECT * FROM sources WHERE id IN (${usedSourceIds.length ? usedSourceIds.map(() => '?').join(',') : 'NULL'})`, usedSourceIds);
+        const allSources = await db.all(`SELECT * FROM source_records WHERE id IN (${usedSourceIds.length ? usedSourceIds.map(() => '?').join(',') : 'NULL'})`, usedSourceIds);
         const citations = allSources.map((s) => ({
             source_id: s.id,
             title: s.title,

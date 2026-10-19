@@ -3,22 +3,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.initializeSchema = void 0;
 exports.seedDatabase = seedDatabase;
 exports.ensureSeeded = ensureSeeded;
+require("dotenv/config");
 const database_1 = require("./database");
 Object.defineProperty(exports, "initializeSchema", { enumerable: true, get: function () { return database_1.initializeSchema; } });
 const seed_data_1 = require("../data/seed-data");
+const seed_data_2 = require("../data/seed-data");
 async function seedDatabase(db, { reset = false } = {}) {
     if (reset) {
         await db.exec(`
+      DELETE FROM saved_comparisons;
       DELETE FROM saved_research;
       DELETE FROM announcements;
-      DELETE FROM policies;
+      DELETE FROM provider_capabilities;
       DELETE FROM provider_sources;
-      DELETE FROM providers;
+      DELETE FROM service_providers;
+      DELETE FROM policy_records;
       DELETE FROM city_metrics;
       DELETE FROM company_sources;
       DELETE FROM company_locations;
       DELETE FROM companies;
-      DELETE FROM sources;
+      DELETE FROM source_records;
       DELETE FROM locations;
       DELETE FROM sectors;
     `);
@@ -33,11 +37,12 @@ async function seedDatabase(db, { reset = false } = {}) {
     const insertLocation = 'INSERT OR IGNORE INTO locations (id, name, state, tier, population, gdp_per_capita_usd) VALUES (?, ?, ?, ?, ?, ?)';
     for (const l of seed_data_1.locations)
         await db.run(insertLocation, [l.id, l.name, l.state, l.tier, l.population, l.gdp_per_capita_usd]);
-    const insertSource = `INSERT OR IGNORE INTO sources
-    (id, title, url, source_type, publication_date, last_verified_date, verification_status, notes)
-    VALUES (?, ?, ?, ?, ?, datetime('now'), ?, ?)`;
-    for (const s of seed_data_1.sources)
-        await db.run(insertSource, [s.id, s.title, s.url, s.source_type, s.publication_date, s.verification_status, s.notes]);
+    const insertSource = `INSERT OR IGNORE INTO source_records
+    (id, title, url, publisher, source_type, publication_date, last_verified_date, verification_status, confidence_level, notes)
+    VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?, ?, ?)`;
+    for (const s of seed_data_1.sources) {
+        await db.run(insertSource, [s.id, s.title, s.url, s.publisher, s.source_type, s.publication_date, s.verification_status, s.confidence_level, s.notes]);
+    }
     const insertCompany = `INSERT INTO companies
     (id, name, parent_company, sector_id, headquarters_country, headquarters_city, india_entry_year,
      operating_status, employee_count_india, employee_count_global, description, website, logo_url, is_demo_data)
@@ -66,11 +71,16 @@ async function seedDatabase(db, { reset = false } = {}) {
     for (const m of seed_data_1.cityMetrics) {
         await db.run(insertMetric, [m.id ?? (0, database_1.newId)('met'), m.location_id, m.metric_name, m.metric_value, m.metric_unit, m.metric_period, m.metric_definition, m.source_id, m.is_estimate ? 1 : 0, m.confidence_level]);
     }
-    const insertPolicy = `INSERT INTO policies
-    (id, title, state, policy_type, description, benefits, eligibility_criteria, effective_date, expiry_date, source_id, is_active)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    for (const p of seed_data_1.policies) {
-        await db.run(insertPolicy, [p.id, p.title, p.state, p.policy_type, p.description, p.benefits, p.eligibility_criteria, p.effective_date, p.expiry_date, p.source_id, p.is_active]);
+    const insertPolicy = `INSERT INTO policy_records
+    (id, title, state, policy_type, status, description, benefits, normalized_benefits,
+     eligibility_criteria, effective_date, expiry_date, source_id, is_active)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    for (const p of seed_data_2.policies) {
+        await db.run(insertPolicy, [
+            p.id, p.title, p.state, p.policy_type, p.status, p.description,
+            p.benefits, p.normalized_benefits ?? null, p.eligibility_criteria,
+            p.effective_date, p.expiry_date, p.source_id, p.is_active,
+        ]);
     }
     const insertAnnouncement = `INSERT INTO announcements
     (id, company_id, location_id, title, summary, content, announcement_type, announcement_date, source_id, employee_count_mentioned, investment_amount_usd, is_verified)
@@ -78,19 +88,24 @@ async function seedDatabase(db, { reset = false } = {}) {
     for (const a of seed_data_1.announcements) {
         await db.run(insertAnnouncement, [a.id, a.company_id, a.location_id, a.title, a.summary, null, a.announcement_type, a.announcement_date, a.source_id, a.employee_count_mentioned, a.investment_amount_usd, a.is_verified]);
     }
-    const insertProvider = `INSERT INTO providers
+    const insertProvider = `INSERT INTO service_providers
     (id, name, category, subcategory, description, website, contact_email, contact_phone,
-     headquarters_location_id, operating_locations, capabilities, case_studies, founded_year,
+     headquarters_location_id, operating_locations, case_studies, founded_year,
      employee_count, is_verified, verification_notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const insertProviderSource = 'INSERT OR IGNORE INTO provider_sources (id, provider_id, source_id) VALUES (?, ?, ?)';
+    const insertProviderCapability = `INSERT OR IGNORE INTO provider_capabilities (id, provider_id, capability, source_id)
+    VALUES (?, ?, ?, ?)`;
     for (const p of seed_data_1.providers) {
         await db.run(insertProvider, [
             p.id, p.name, p.category, p.subcategory, p.description, p.website, null, null,
-            p.headquarters_location_id, JSON.stringify(p.operating_locations), JSON.stringify(p.capabilities),
+            p.headquarters_location_id, JSON.stringify(p.operating_locations),
             p.case_studies, p.founded_year, p.employee_count, p.is_verified, p.verification_notes,
         ]);
         await db.run(insertProviderSource, [(0, database_1.newId)('ps'), p.id, p.source_id]);
+        for (const capability of p.capabilities) {
+            await db.run(insertProviderCapability, [(0, database_1.newId)('pc'), p.id, capability, p.source_id]);
+        }
     }
 }
 async function ensureSeeded() {

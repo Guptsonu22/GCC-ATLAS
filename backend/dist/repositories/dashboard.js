@@ -11,8 +11,8 @@ function createDashboardRepo(db) {
             count('SELECT COUNT(*) AS n FROM companies'),
             count('SELECT COUNT(*) AS n FROM locations'),
             count('SELECT COUNT(*) AS n FROM sectors'),
-            count('SELECT COUNT(*) AS n FROM providers'),
-            count('SELECT COUNT(*) AS n FROM sources'),
+            count('SELECT COUNT(*) AS n FROM service_providers'),
+            count('SELECT COUNT(*) AS n FROM source_records'),
             count(`SELECT COUNT(*) AS n FROM announcements WHERE announcement_date >= date('now', '-365 days')`),
         ]);
         const companies_by_city = await db.all(`SELECT l.name AS city, COUNT(DISTINCT cl.company_id) AS count
@@ -23,10 +23,10 @@ function createDashboardRepo(db) {
        GROUP BY s.id ORDER BY count DESC`);
         const companies_by_status = await db.all('SELECT operating_status AS status, COUNT(*) AS count FROM companies GROUP BY operating_status ORDER BY count DESC');
         const data_freshness = {
-            sources_verified_last_30_days: await count(`SELECT COUNT(*) AS n FROM sources WHERE last_verified_date >= date('now', '-30 days')`),
-            sources_verified_last_90_days: await count(`SELECT COUNT(*) AS n FROM sources WHERE last_verified_date >= date('now', '-90 days')`),
-            stale_sources: await count(`SELECT COUNT(*) AS n FROM sources WHERE verification_status IN ('stale', 'unverified')`),
-            unverified_sources: await count(`SELECT COUNT(*) AS n FROM sources WHERE verification_status = 'unverified'`),
+            sources_verified_last_30_days: await count(`SELECT COUNT(*) AS n FROM source_records WHERE last_verified_date >= date('now', '-30 days')`),
+            sources_verified_last_90_days: await count(`SELECT COUNT(*) AS n FROM source_records WHERE last_verified_date >= date('now', '-90 days')`),
+            stale_sources: await count(`SELECT COUNT(*) AS n FROM source_records WHERE verification_status IN ('stale', 'unverified')`),
+            unverified_sources: await count(`SELECT COUNT(*) AS n FROM source_records WHERE verification_status = 'unverified'`),
         };
         return {
             total_companies, total_locations, total_sectors, total_providers, total_sources,
