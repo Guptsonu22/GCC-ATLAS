@@ -45,7 +45,7 @@ export function SourcesPage() {
 
   const sources = useQuery({
     queryKey: ['sources', params],
-    queryFn: async () => sourcesResponseSchema.parse((await api.get('/sources', { params })).data),
+    queryFn: async () => sourcesResponseSchema.parse((await api.get('/source-records', { params })).data),
     placeholderData: keepPreviousData,
   });
 

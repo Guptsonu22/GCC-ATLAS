@@ -4,10 +4,12 @@ export const sourceSchema = z.object({
   id: z.string(),
   title: z.string(),
   url: z.string(),
+  publisher: z.string().nullable().optional(),
   source_type: z.string(),
   publication_date: z.string().nullable().optional(),
   last_verified_date: z.string(),
   verification_status: z.enum(['verified', 'unverified', 'stale', 'conflicting']),
+  confidence_level: z.enum(['high', 'medium', 'low']),
   notes: z.string().nullable().optional(),
 });
 
@@ -102,16 +104,26 @@ export const cityDetailSchema = z.object({
         title: z.string(),
         state: z.string(),
         policy_type: z.string(),
+        status: z.enum(['draft', 'finalized', 'announced', 'superseded']),
         description: z.string().nullable().optional(),
         benefits: z.string().nullable().optional(),
+        normalized_benefits: z.string().nullable().optional(),
+        eligibility_criteria: z.string().nullable().optional(),
         effective_date: z.string().nullable().optional(),
         expiry_date: z.string().nullable().optional(),
         is_active: z.number(),
         source_title: z.string().nullable().optional(),
         source_url: z.string().nullable().optional(),
+        source_publisher: z.string().nullable().optional(),
       }),
     )
     .optional(),
+});
+
+export const capabilitySchema = z.object({
+  capability: z.string(),
+  source_id: z.string().nullable().optional(),
+  source_url: z.string().nullable().optional(),
 });
 
 export const providerSchema = z.object({
@@ -122,13 +134,12 @@ export const providerSchema = z.object({
   description: z.string().nullable().optional(),
   website: z.string().nullable().optional(),
   headquarters_location_id: z.string().nullable().optional(),
-  capabilities: z.string().nullable().optional(),
   case_studies: z.string().nullable().optional(),
   founded_year: z.number().nullable().optional(),
   is_verified: z.number(),
   verification_notes: z.string().nullable().optional(),
   operating_location_objects: z.array(locationSchema).optional(),
-  capability_list: z.array(z.string()).optional(),
+  capability_list: z.array(z.union([z.string(), capabilitySchema])).optional(),
   case_study_list: z.array(z.record(z.string(), z.unknown())).optional(),
   headquarters_location: locationSchema.optional(),
   sources: z.array(sourceSchema).optional(),
@@ -145,6 +156,7 @@ export type Announcement = z.infer<typeof announcementSchema>;
 export type AIQueryResponse = z.infer<typeof aiQueryResponseSchema>;
 export type AssistantStatus = z.infer<typeof assistantStatusSchema>;
 export type SavedResearch = z.infer<typeof savedResearchSchema>;
+export type SavedComparison = z.infer<typeof savedComparisonSchema>;
 
 export const dashboardStatsSchema = z.object({
   total_companies: z.number(),
@@ -203,9 +215,24 @@ export const assistantStatusSchema = z.object({
 
 export const savedResearchSchema = z.object({
   id: z.string(),
+  session_key: z.string(),
+  user_id: z.string().nullable().optional(),
   name: z.string(),
   type: z.enum(['city_comparison', 'company_comparison', 'provider_comparison', 'custom_query']),
   data: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export const savedComparisonSchema = z.object({
+  id: z.string(),
+  session_key: z.string(),
+  user_id: z.string().nullable().optional(),
+  name: z.string(),
+  type: z.enum(['city_comparison', 'company_comparison']),
+  location_ids: z.string(),
+  metric_names: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });
