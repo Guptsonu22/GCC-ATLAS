@@ -6,7 +6,8 @@ import { createCitiesRepo } from '../src/repositories/cities';
 import { createProvidersRepo } from '../src/repositories/providers';
 import { createDashboardRepo } from '../src/repositories/dashboard';
 import { createSavedResearchRepo } from '../src/repositories/saved-research';
-import { createSourcesRepo } from '../src/repositories/sources';
+import { createSavedComparisonsRepo } from '../src/repositories/saved-comparisons';
+import { createSourceRecordsRepo } from '../src/repositories/source-records';
 import { createAnnouncementsRepo } from '../src/repositories/announcements';
 import type { Database } from 'sqlite';
 
@@ -146,45 +147,74 @@ describe('dashboard repo', () => {
 });
 
 describe('saved research repo', () => {
-  it('creates, lists, renames and deletes saved items', async () => {
+  it('creates, renames, lists and deletes saved items for a session', async () => {
     const repo = createSavedResearchRepo(db);
     const created = await repo.createSaved({
-      user_id: 'test-user',
+      session_key: 'test-session-1',
       name: 'BLR vs HYD',
       type: 'city_comparison',
       data: { ids: ['loc_bengaluru', 'loc_hyderabad'] },
     });
     expect(created!.name).toBe('BLR vs HYD');
+    expect(created!.session_key).toBe('test-session-1');
+    expect(created!.user_id).toBeNull();
 
-    const renamed = await repo.updateSaved(created!.id, 'test-user', { name: 'BLR vs HYD 2026' });
+    const renamed = await repo.updateSaved(created!.id, 'test-session-1', { name: 'BLR vs HYD 2026' });
     expect(renamed!.name).toBe('BLR vs HYD 2026');
 
-    const list = await repo.listSaved('test-user');
+    const list = await repo.listSaved('test-session-1');
     expect(list.length).toBe(1);
 
-    const deleted = await repo.deleteSaved(created!.id, 'test-user');
+    const deleted = await repo.deleteSaved(created!.id, 'test-session-1');
     expect(deleted).toBe(true);
-    expect((await repo.listSaved('test-user')).length).toBe(0);
+    expect((await repo.listSaved('test-session-1')).length).toBe(0);
   });
 
-  it('isolates by user id', async () => {
+  it('isolates records by session key (no cross-session exposure)', async () => {
     const repo = createSavedResearchRepo(db);
-    const created = await repo.createSaved({ user_id: 'user-a', name: 'A', type: 'custom_query', data: {} });
-    expect(await repo.getSaved(created!.id, 'user-b')).toBeFalsy();
-    expect(await repo.updateSaved(created!.id, 'user-b', { name: 'hijack' })).toBeFalsy();
-    expect(await repo.deleteSaved(created!.id, 'user-b')).toBe(false);
+    const created = await repo.createSaved({ session_key: 'session-alpha', name: 'A', type: 'custom_query', data: {} });
+    expect(await repo.getSaved(created!.id, 'session-beta')).toBeFalsy();
+    expect(await repo.updateSaved(created!.id, 'session-beta', { name: 'hijack' })).toBeFalsy();
+    expect(await repo.deleteSaved(created!.id, 'session-beta')).toBe(false);
+    await repo.deleteSaved(created!.id, 'session-alpha');
   });
 });
 
-describe('sources & announcements repos', () => {
-  it('searches sources and filters by verification status', async () => {
-    const repo = createSourcesRepo(db);
-    const all = await repo.listSources({ page_size: 100 });
+describe('saved comparisons repo', () => {
+  it('creates and lists city comparisons scoped to a session', async () => {
+    const repo = createSavedComparisonsRepo(db);
+    const created = await repo.createComparison('compare-session-1', {
+      name: 'Top-3 hubs',
+      location_ids: ['loc_bengaluru', 'loc_hyderabad', 'loc_mumbai'],
+      metric_names: ['gcc_count'],
+      notes: 'Phase 3 seed test',
+    });
+    expect(created!.name).toBe('Top-3 hubs');
+    expect(created!.type).toBe('city_comparison');
+    expect(JSON.parse(created!.location_ids)).toHaveLength(3);
+
+    const list = await repo.listComparisons('compare-session-1');
+    expect(list.length).toBe(1);
+    expect(await repo.listComparisons('compare-session-2')).toHaveLength(0);
+
+    expect(await repo.deleteComparison(created!.id, 'compare-session-2')).toBe(false);
+    expect(await repo.deleteComparison(created!.id, 'compare-session-1')).toBe(true);
+  });
+});
+
+describe('source records & announcements repos', () => {
+  it('searches source records and filters by verification status and confidence', async () => {
+    const repo = createSourceRecordsRepo(db);
+    const all = await repo.listSourceRecords({ page_size: 100 });
     expect(all.total).toBeGreaterThan(20);
-    const unverified = await repo.listSources({ verification_status: 'unverified', page_size: 100 });
+    const unverified = await repo.listSourceRecords({ verification_status: 'unverified', page_size: 100 });
     expect(unverified.total).toBeGreaterThan(5);
-    const searched = await repo.listSources({ query: 'Boeing' });
+    const searched = await repo.listSourceRecords({ query: 'Boeing' });
     expect(searched.total).toBeGreaterThanOrEqual(1);
+    const highConfidence = await repo.listSourceRecords({ confidence_level: 'high', page_size: 100 });
+    expect(highConfidence.total).toBeGreaterThan(5);
+    expect(highConfidence.data.every((s) => s.confidence_level === 'high')).toBe(true);
+    expect(all.data.every((s) => typeof s.title === 'string')).toBe(true);
   });
 
   it('lists announcements with source provenance', async () => {

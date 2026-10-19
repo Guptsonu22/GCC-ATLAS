@@ -6,3 +6,196 @@ Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
 
  [31m❯[39m tests/repositories.test.ts [2m([22m[2m0 test[22m[2m)[22m
  [32m✓[39m tests/assistant.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 106[2mms[22m[39m
+ [31m❯[39m tests/api.test.ts [2m([22m[2m12 tests[22m[2m | [22m[31m12 failed[39m[2m)[22m[33m 360230[2mms[22m[39m
+[31m     [31m×[31m health endpoint responds[39m[33m 30020[2mms[22m[39m
+[31m     [31m×[31m dashboard stats include counting note[39m[33m 30005[2mms[22m[39m
+[31m     [31m×[31m companies list, filter, paginate and 404 handling[39m[33m 30005[2mms[22m[39m
+[31m     [31m×[31m rejects invalid filters with 400[39m[33m 30015[2mms[22m[39m
+[31m     [31m×[31m city comparison endpoint works with multiple cities[39m[33m 30016[2mms[22m[39m
+[31m     [31m×[31m assistant status reports demo mode without key[39m[33m 30014[2mms[22m[39m
+[31m     [31m×[31m assistant query returns demo answer with citations[39m[33m 30017[2mms[22m[39m
+[31m     [31m×[31m assistant rejects short queries[39m[33m 30004[2mms[22m[39m
+[31m     [31m×[31m saved research full CRUD cycle over HTTP[39m[33m 30005[2mms[22m[39m
+[31m     [31m×[31m 404 for unknown routes with JSON error[39m[33m 30015[2mms[22m[39m
+[31m     [31m×[31m sources and announcements endpoints respond[39m[33m 30010[2mms[22m[39m
+[31m     [31m×[31m providers filter by category[39m[33m 30001[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/repositories.test.ts[2m [ tests/repositories.test.ts ][22m
+[31m[1mError[22m: Cannot find module '../src/repositories/sources' imported from C:/Users/Sonu/OneDrive/Desktop/GCC ATLAS/backend/tests/repositories.test.ts[39m
+[36m [2m❯[22m tests/repositories.test.ts:[2m9:1[22m[39m
+    [90m  7|[39m [35mimport[39m { createDashboardRepo } [35mfrom[39m [32m'../src/repositories/dashboard'[39m[33m;[39m
+    [90m  8|[39m import { createSavedResearchRepo } from '../src/repositories/saved-res…
+    [90m  9|[39m import { createSavedComparisonsRepo } from '../src/repositories/saved-…
+    [90m   |[39m [31m^[39m
+    [90m 10|[39m import { createSourceRecordsRepo } from '../src/repositories/source-re…
+    [90m 11|[39m import { createAnnouncementsRepo } from '../src/repositories/announcem…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯[22m[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 12 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22mhealth endpoint responds
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m16:3[22m[39m
+    [90m 14|[39m
+    [90m 15|[39m [34mdescribe[39m([32m'API integration'[39m[33m,[39m () [33m=>[39m {
+    [90m 16|[39m   [34mit[39m([32m'health endpoint responds'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   |[39m   [31m^[39m
+    [90m 17|[39m     [35mconst[39m res [33m=[39m [35mawait[39m [34mrequest[39m(app)[33m.[39m[35mget[39m([32m'/api/health'[39m)[33m;[39m
+    [90m 18|[39m     [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22mdashboard stats include counting note
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m22:3[22m[39m
+    [90m 20|[39m   })[33m;[39m
+    [90m 21|[39m
+    [90m 22|[39m   [34mit[39m([32m'dashboard stats include counting note'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   |[39m   [31m^[39m
+    [90m 23|[39m     [35mconst[39m res [33m=[39m [35mawait[39m [34mrequest[39m(app)[33m.[39m[35mget[39m([32m'/api/dashboard/stats'[39m)[33m;[39m
+    [90m 24|[39m     [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22mcompanies list, filter, paginate and 404 handling
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m29:3[22m[39m
+    [90m 27|[39m   })[33m;[39m
+    [90m 28|[39m
+    [90m 29|[39m   [34mit[39m([32m'companies list, filter, paginate and 404 handling'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   |[39m   [31m^[39m
+    [90m 30|[39m     const list = await request(app).get('/api/companies?page=1&page_si…
+    [90m 31|[39m     [34mexpect[39m(list[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22mrejects invalid filters with 400
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m44:3[22m[39m
+    [90m 42|[39m   })[33m;[39m
+    [90m 43|[39m
+    [90m 44|[39m   [34mit[39m([32m'rejects invalid filters with 400'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   |[39m   [31m^[39m
+    [90m 45|[39m     const res = await request(app).get('/api/companies?page=notanumber…
+    [90m 46|[39m     [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m400[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22mcity comparison endpoint works with multiple cities
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m50:3[22m[39m
+    [90m 48|[39m   })[33m;[39m
+    [90m 49|[39m
+    [90m 50|[39m   it('city comparison endpoint works with multiple cities', async () =…
+    [90m   |[39m   [31m^[39m
+    [90m 51|[39m     const res = await request(app).get('/api/cities/compare?ids=loc_be…
+    [90m 52|[39m     [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22massistant status reports demo mode without key
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m56:3[22m[39m
+    [90m 54|[39m   })[33m;[39m
+    [90m 55|[39m
+    [90m 56|[39m   [34mit[39m([32m'assistant status reports demo mode without key'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   |[39m   [31m^[39m
+    [90m 57|[39m     [35mconst[39m res [33m=[39m [35mawait[39m [34mrequest[39m(app)[33m.[39m[35mget[39m([32m'/api/assistant/status'[39m)[33m;[39m
+    [90m 58|[39m     [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22massistant query returns demo answer with citations
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m63:3[22m[39m
+    [90m 61|[39m   })[33m;[39m
+    [90m 62|[39m
+    [90m 63|[39m   it('assistant query returns demo answer with citations', async () =>…
+    [90m   |[39m   [31m^[39m
+    [90m 64|[39m     const res = await request(app).post('/api/assistant/query').send({…
+    [90m 65|[39m     [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22massistant rejects short queries
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m70:3[22m[39m
+    [90m 68|[39m   })[33m;[39m
+    [90m 69|[39m
+    [90m 70|[39m   [34mit[39m([32m'assistant rejects short queries'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   |[39m   [31m^[39m
+    [90m 71|[39m     const res = await request(app).post('/api/assistant/query').send({…
+    [90m 72|[39m     [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m400[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22msaved research full CRUD cycle over HTTP
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m75:3[22m[39m
+    [90m 73|[39m   })[33m;[39m
+    [90m 74|[39m
+    [90m 75|[39m   [34mit[39m([32m'saved research full CRUD cycle over HTTP'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   |[39m   [31m^[39m
+    [90m 76|[39m     [35mconst[39m create [33m=[39m [35mawait[39m [34mrequest[39m(app)
+    [90m 77|[39m       [33m.[39m[34mpost[39m([32m'/api/saved-research'[39m)
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22m404 for unknown routes with JSON error
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m94:3[22m[39m
+    [90m 92|[39m   })[33m;[39m
+    [90m 93|[39m
+    [90m 94|[39m   [34mit[39m([32m'404 for unknown routes with JSON error'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   |[39m   [31m^[39m
+    [90m 95|[39m     [35mconst[39m res [33m=[39m [35mawait[39m [34mrequest[39m(app)[33m.[39m[35mget[39m([32m'/api/nonsense'[39m)[33m;[39m
+    [90m 96|[39m     [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m404[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22msources and announcements endpoints respond
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m100:3[22m[39m
+    [90m 98|[39m   })[33m;[39m
+    [90m 99|[39m
+    [90m100|[39m   [34mit[39m([32m'sources and announcements endpoints respond'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   |[39m   [31m^[39m
+    [90m101|[39m     const sources = await request(app).get('/api/sources?verification_…
+    [90m102|[39m     [34mexpect[39m(sources[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/13]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/api.test.ts[2m > [22mAPI integration[2m > [22mproviders filter by category
+[31m[1mError[22m: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+[36m [2m❯[22m tests/api.test.ts:[2m110:3[22m[39m
+    [90m108|[39m   })[33m;[39m
+    [90m109|[39m
+    [90m110|[39m   [34mit[39m([32m'providers filter by category'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m   |[39m   [31m^[39m
+    [90m111|[39m     [35mconst[39m res [33m=[39m [35mawait[39m [34mrequest[39m(app)[33m.[39m[35mget[39m([32m'/api/providers?category=eor'[39m)[33m;[39m
+    [90m112|[39m     [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/13]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[31m12 failed[39m[22m[2m | [22m[1m[32m7 passed[39m[22m[90m (19)[39m
+[2m   Start at [22m 23:49:10
+[2m   Duration [22m 361.50s[2m (transform 553ms, setup 0ms, import 1.23s, tests 360.34s, environment 0ms)[22m
+

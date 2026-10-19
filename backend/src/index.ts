@@ -17,7 +17,7 @@ export async function createApp(): Promise<express.Express> {
   const app = express();
   app.use(cors(buildCorsOptions(env.CORS_ORIGIN)));
   app.use(express.json({ limit: '1mb' }));
-  app.use(requestLogger);
+  app.use(requestLogger(env.NODE_ENV));
 
   const db = await getDatabase();
   await ensureSeeded();
