@@ -1,0 +1,265 @@
+export interface Sector {
+  id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  state: string;
+  country: string;
+  tier: 'tier1' | 'tier2' | 'tier3' | 'emerging';
+  population: number | null;
+  gdp_per_capita_usd: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Source {
+  id: string;
+  title: string;
+  url: string;
+  source_type: 'news' | 'government' | 'company_announcement' | 'report' | 'job_board' | 'provider_website' | 'other';
+  publication_date: string | null;
+  last_verified_date: string;
+  verification_status: 'verified' | 'unverified' | 'stale' | 'conflicting';
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  parent_company: string | null;
+  sector_id: string | null;
+  headquarters_country: string | null;
+  headquarters_city: string | null;
+  india_entry_year: number | null;
+  operating_status: 'active' | 'expanding' | 'downsizing' | 'closed' | 'announced';
+  employee_count_india: number | null;
+  employee_count_global: number | null;
+  description: string | null;
+  website: string | null;
+  logo_url: string | null;
+  is_demo_data: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CompanyWithRelations extends Company {
+  sector?: Sector;
+  locations?: CompanyLocation[];
+  sources?: Source[];
+}
+
+export interface CompanyLocation {
+  id: string;
+  company_id: string;
+  location_id: string;
+  office_type: 'headquarters' | 'development_center' | 'bpo' | 'captive' | 'shared_services' | 'innovation_lab' | 'other';
+  employee_count: number | null;
+  established_year: number | null;
+  is_primary: number;
+  source_id: string | null;
+  created_at: string;
+  updated_at: string;
+  location?: Location;
+  source?: Source;
+}
+
+export interface CompanySource {
+  id: string;
+  company_id: string;
+  source_id: string;
+  field_referenced: string | null;
+  created_at: string;
+  source?: Source;
+}
+
+export interface CityMetric {
+  id: string;
+  location_id: string;
+  metric_name: string;
+  metric_value: number | null;
+  metric_unit: string | null;
+  metric_period: string | null;
+  metric_definition: string | null;
+  source_id: string | null;
+  is_estimate: number;
+  confidence_level: 'high' | 'medium' | 'low';
+  created_at: string;
+  updated_at: string;
+  location?: Location;
+  source?: Source;
+}
+
+export interface Provider {
+  id: string;
+  name: string;
+  category: 'legal' | 'tax' | 'recruitment' | 'payroll' | 'eor' | 'real_estate' | 'consulting' | 'immigration' | 'other';
+  subcategory: string | null;
+  description: string | null;
+  website: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  headquarters_location_id: string | null;
+  operating_locations: string | null; // JSON array
+  capabilities: string | null; // JSON array
+  case_studies: string | null; // JSON array
+  founded_year: number | null;
+  employee_count: number | null;
+  is_verified: number;
+  verification_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProviderWithRelations extends Provider {
+  headquarters_location?: Location;
+  operating_location_objects?: Location[];
+  capability_list?: string[];
+  case_study_list?: CaseStudy[];
+  sources?: Source[];
+}
+
+export interface CaseStudy {
+  title: string;
+  description: string;
+  client_type: string;
+  outcome: string;
+  source_url?: string;
+}
+
+export interface ProviderSource {
+  id: string;
+  provider_id: string;
+  source_id: string;
+  created_at: string;
+  source?: Source;
+}
+
+export interface Policy {
+  id: string;
+  title: string;
+  state: string;
+  policy_type: 'incentive' | 'regulation' | 'infrastructure' | 'talent' | 'tax' | 'land' | 'other';
+  description: string | null;
+  benefits: string | null; // JSON array
+  eligibility_criteria: string | null;
+  effective_date: string | null;
+  expiry_date: string | null;
+  source_id: string | null;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+  source?: Source;
+}
+
+export interface Announcement {
+  id: string;
+  company_id: string | null;
+  location_id: string | null;
+  title: string;
+  summary: string | null;
+  content: string | null;
+  announcement_type: 'expansion' | 'new_center' | 'hiring' | 'investment' | 'partnership' | 'policy' | 'closure' | 'other';
+  announcement_date: string;
+  source_id: string | null;
+  employee_count_mentioned: number | null;
+  investment_amount_usd: number | null;
+  is_verified: number;
+  created_at: string;
+  updated_at: string;
+  company?: Company;
+  location?: Location;
+  source?: Source;
+}
+
+export interface SavedResearch {
+  id: string;
+  user_id: string;
+  name: string;
+  type: 'city_comparison' | 'company_comparison' | 'provider_comparison' | 'custom_query';
+  data: string; // JSON
+  created_at: string;
+  updated_at: string;
+}
+
+// API request/response types
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export interface CompanyFilters {
+  query?: string;
+  sector_id?: string;
+  location_id?: string;
+  operating_status?: Company['operating_status'];
+  parent_company?: string;
+  is_demo_data?: boolean;
+  page?: number;
+  page_size?: number;
+  sort_by?: 'name' | 'employee_count_india' | 'india_entry_year' | 'created_at';
+  sort_order?: 'asc' | 'desc';
+}
+
+export interface ProviderFilters {
+  category?: Provider['category'];
+  location_id?: string;
+  query?: string;
+  is_verified?: boolean;
+  page?: number;
+  page_size?: number;
+}
+
+export interface CityComparisonFilters {
+  location_ids: string[];
+  metric_names?: string[];
+}
+
+export interface AIQueryRequest {
+  query: string;
+  context?: Record<string, unknown>;
+  use_demo_mode?: boolean;
+}
+
+export interface AIQueryResponse {
+  answer: string;
+  citations: Citation[];
+  confidence: 'high' | 'medium' | 'low';
+  is_demo_mode: boolean;
+  insufficient_evidence: boolean;
+}
+
+export interface Citation {
+  source_id: string;
+  title: string;
+  url: string;
+  publication_date: string | null;
+  relevant_excerpt: string;
+}
+
+export interface DashboardStats {
+  total_companies: number;
+  total_locations: number;
+  total_sectors: number;
+  total_providers: number;
+  total_sources: number;
+  recent_announcements: number;
+  companies_by_city: { city: string; count: number }[];
+  companies_by_sector: { sector: string; count: number }[];
+  companies_by_status: { status: string; count: number }[];
+  data_freshness: {
+    sources_verified_last_30_days: number;
+    sources_verified_last_90_days: number;
+    stale_sources: number;
+  };
+}
