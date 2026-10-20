@@ -47,7 +47,8 @@ VITE_API_BASE_URL=https://your-backend-host/api npm run build   # → frontend/d
 1. New → Web Service → connect the repo; root dir `backend`.
 2. Build command: `npm ci --include=dev && npm run build`; Start command: `npm start` (package.json start = `node dist/index.js`).
 3. Add **Disk**: mount path `/data`, size ≥ 1 GB; env `DB_PATH=/data/gcc-atlas.db`.
-4. Env vars: as in §2 (`NODE_ENV=production`, `CORS_ORIGIN=https://<frontend-host>.onrender.com`).
+4. Env vars: as in §2 (`NODE_ENV=production`, `NODE_VERSION=20.18.0`, `CORS_ORIGIN=https://<frontend-host>.onrender.com`).
+   *Native Addons (GLIBC compatibility):* Node 20 LTS is pinned via `.node-version`. The backend build script automatically detects Linux environments and rebuilds `sqlite3` from source via `scripts/rebuild-sqlite-linux.js` using Render's native Debian 12 compiler toolchain, completely eliminating `GLIBC_2.38 not found` errors.
 5. Health check path: `/api/health` (returns `{status:'ok', db:'connected'}`; used as the platform's health probe).
 6. Logs: Render dashboard → service → Logs tab (the app also logs one structured line per request: `[gcc-atlas-api] GET /api/... 200 12ms`).
 
