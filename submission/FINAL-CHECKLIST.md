@@ -25,9 +25,12 @@
 
 ## 2. Prototype Verification & Execution State
 
+- **Live Deployed Prototype URL (Vercel):** [https://gcc-atlas-kohl.vercel.app](https://gcc-atlas-kohl.vercel.app)
+- **Live Production API Endpoint (Render):** [https://gcc-atlas-j88x.onrender.com/api](https://gcc-atlas-j88x.onrender.com/api)
+- **Live Health Check Probe:** [https://gcc-atlas-j88x.onrender.com/api/health](https://gcc-atlas-j88x.onrender.com/api/health) &rarr; `{"status":"ok","service":"gcc-atlas-api","version":"0.1.0","mode":"demo","database":"ok"}`
+- **Live Ecosystem Stats Endpoint:** [https://gcc-atlas-j88x.onrender.com/api/dashboard/stats](https://gcc-atlas-j88x.onrender.com/api/dashboard/stats) &rarr; 46 companies, 12 locations, 36 sources verified
 - **Local Prototype URL:** [http://localhost:5173](http://localhost:5173) (Vite SPA frontend with live proxy)
 - **Local API Endpoint:** [http://localhost:4000/api](http://localhost:4000/api)
-- **Health Check Endpoint:** [http://localhost:4000/api/health](http://localhost:4000/api/health) &rarr; `{"status":"ok","service":"gcc-atlas-api","version":"0.1.0","mode":"demo","database":"ok"}`
 - **Repository Remote:** [https://github.com/Guptsonu22/GCC-ATLAS](https://github.com/Guptsonu22/GCC-ATLAS)
 
 ---

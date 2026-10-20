@@ -4,6 +4,13 @@ Research-backed directory, decision engine, and location intelligence tool for G
 
 Built as the capstone submission for the **Flexiple Product Intern Assignment**, GCC Atlas bridges the critical information asymmetry in India's GCC ecosystem by delivering a provenance-first platform where every metric, rent figure, and policy incentive carries explicit counting denominators and source verification trails.
 
+### 🌐 Live Production Deployments
+- **Live Web Application (Vercel):** [https://gcc-atlas-kohl.vercel.app](https://gcc-atlas-kohl.vercel.app)
+- **Live Production API (Render):** [https://gcc-atlas-j88x.onrender.com/api](https://gcc-atlas-j88x.onrender.com/api)
+- **API Health Probe:** [https://gcc-atlas-j88x.onrender.com/api/health](https://gcc-atlas-j88x.onrender.com/api/health)
+- **Final Strategy Deck (PDF):** [`submission/GCC-Atlas-Strategy-Deck-Final.pdf`](submission/GCC-Atlas-Strategy-Deck-Final.pdf)
+- **Final Strategy Deck (PPTX):** [`submission/GCC-Atlas-Strategy-Deck-Final.pptx`](submission/GCC-Atlas-Strategy-Deck-Final.pptx)
+
 ---
 
 ## 1. Product Overview

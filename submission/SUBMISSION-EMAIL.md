@@ -7,7 +7,8 @@
 **Final Strategy Deck (PPTX):** [`submission/GCC-Atlas-Strategy-Deck-Final.pptx`](submission/GCC-Atlas-Strategy-Deck-Final.pptx)  
 **Final Strategy Deck (PDF):** [`submission/GCC-Atlas-Strategy-Deck-Final.pdf`](submission/GCC-Atlas-Strategy-Deck-Final.pdf)  
 **Initial Deck (Reference):** [`submission/GCC-Atlas-Strategy-Deck.pdf`](submission/GCC-Atlas-Strategy-Deck.pdf)  
-**Prototype URL:** [http://localhost:5173 or deployed public URL]  
+**Live Prototype URL:** https://gcc-atlas-kohl.vercel.app  
+**Live Backend API:** https://gcc-atlas-j88x.onrender.com/api (Health: https://gcc-atlas-j88x.onrender.com/api/health)  
 
 ---
 
@@ -32,7 +33,8 @@ Across the Indian GCC landscape, leadership teams evaluating expansion face seve
    - **Frontend:** React 19 + TypeScript + Vite 8 + Tailwind CSS v4 + TanStack Query + Recharts.
    - **Backend:** Node.js 20 + Express 5 + SQLite database with provenance-first schema and parameterized queries.
    - **Interactive Surfaces:** Real-time Dashboard with verification ledger, GCC Explorer with fuzzy search and multi-faceted filtering, Side-by-Side City Compare Workspace (Bengaluru, Hyderabad, Pune, Mumbai, Gurugram, etc.) with normalized policy matrices, Service Provider Directory (free of pay-to-play rankings), Evidence Sources Explorer, and a Cited AI Assistant.
-   - **Local Prototype URL:** `http://localhost:5173` (Proxied to API at `http://localhost:4000`)
+   - **Live Production URL:** https://gcc-atlas-kohl.vercel.app (Connected to production API at https://gcc-atlas-j88x.onrender.com/api)
+   - **Local Prototype URL:** `http://localhost:5173` (Proxied to local API at `http://localhost:4000`)
 
 3. **Rigorous Quality & Engineering Gates:**
    - **108 / 108 automated tests passed** (94 backend Vitest integration tests + 14 frontend smoke/unit tests).
