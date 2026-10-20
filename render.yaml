@@ -1,0 +1,38 @@
+services:
+  # Backend API — Express 5 + SQLite on a persistent disk
+  - type: web
+    name: gcc-atlas-api
+    rootDir: backend
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /data/gcc-atlas.db
+      - key: CORS_ORIGIN
+        sync: false # set to your deployed frontend URL in the dashboard
+      - key: AI_API_KEY
+        sync: false # optional; empty = deterministic demo assistant
+    disk:
+      name: gcc-atlas-db
+      mountPath: /data
+      sizeGB: 1
+
+  # Frontend — Vite static site
+  - type: web
+    name: gcc-atlas-web
+    rootDir: frontend
+    runtime: static
+    buildCommand: npm ci --include=dev && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false # set to https://<gcc-atlas-api-host>/api at deploy time
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

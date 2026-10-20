@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import express, { type ErrorRequestHandler } from 'express';
+import express, { type ErrorRequestHandler, type Request, type Response, type NextFunction } from 'express';
 import cors, { type CorsOptions } from 'cors';
 import { getDatabase, closeDatabase } from './db/database';
 import { ensureSeeded } from './db/seed';
@@ -45,11 +45,11 @@ export async function createApp(): Promise<express.Express> {
   app.use('/api/events', eventsRoutes(db, { writes: limiters.writes, analysis: limiters.analysis }));
   app.use('/api', metaRoutes(db));
 
-  app.use((_req, res) => {
+  app.use((_req: Request, res: Response) => {
     res.status(404).json({ error: { code: 'not_found', message: 'Route not found' } });
   });
 
-  const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+  const errorHandler: ErrorRequestHandler = (err: unknown, _req: Request, res: Response, _next: NextFunction) => {
     const status = (err as { status?: number }).status ?? 500;
     const assistantCode = (err as { code?: string }).code;
     const code =
