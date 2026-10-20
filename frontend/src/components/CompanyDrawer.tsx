@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { ExternalLink, FileText, MapPin, CalendarDays, Quote, ShieldCheck, ShieldAlert } from 'lucide-react';
 import type { Company, Source } from '../services/schemas';
 import { Badge, EmptyState } from './ui';
@@ -116,6 +117,13 @@ export function CompanyDrawer({ company, onClose }: { company: Company; onClose:
               </div>
             )}
           </section>
+
+          <Link
+            to={`/companies/${company.id}`}
+            className="flex w-full items-center justify-center gap-1.5 rounded border border-teal-accent/40 bg-teal-accent/10 px-4 py-2.5 text-xs font-semibold text-teal-accent hover:bg-teal-accent/15"
+          >
+            Open full company record →
+          </Link>
         </div>
       </aside>
     </div>

@@ -63,7 +63,7 @@ export function DashboardPage() {
         <Kpi icon={FolderKanban} label="Sectors" value={s.total_sectors} to="/explorer" />
         <Kpi icon={Database} label="Sources on file" value={s.total_sources} to="/sources" />
         <Kpi icon={ShieldCheck} label="Providers listed" value={s.total_providers} to="/providers" />
-        <Kpi icon={AlertCircle} label="Announcements (12mo)" value={s.recent_announcements} to="/explorer" />
+        <Kpi icon={AlertCircle} label="Announcements (12mo)" value={s.recent_announcements} to="/sources" />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
@@ -141,7 +141,7 @@ export function DashboardPage() {
           <PanelHeader
             title="Recent developments"
             subtitle="Announcements in the dataset, with source provenance"
-            right={<Link to="/explorer" className="text-xs text-teal-accent hover:underline">View all</Link>}
+            right={<Link to="/sources" className="text-xs text-teal-accent hover:underline">View all →</Link>}
           />
           {announcements.isLoading ? (
             <Spinner label="Loading announcements…" />

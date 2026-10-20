@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Search, X, ChevronLeft, ChevronRight, ArrowUpDown, MapPin } from 'lucide-react';
 import { z } from 'zod';
@@ -23,9 +24,10 @@ const PAGE_SIZE = 12;
 
 export function ExplorerPage() {
   useDocumentTitle('GCC Explorer — GCC Atlas');
-  const [query, setQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '');
   const [sector, setSector] = useState('');
-  const [city, setCity] = useState('');
+  const [city, setCity] = useState(() => searchParams.get('city') ?? '');
   const [status, setStatus] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -63,7 +65,6 @@ export function ExplorerPage() {
     const t = setTimeout(() => setDebouncedParams(params), 300);
     return () => clearTimeout(t);
   }, [params]);
-  useEffect(() => setPage(1), [query, sector, city, status, sortBy]);
 
   const companies = useQuery({
     queryKey: ['companies', debouncedParams],
@@ -76,6 +77,8 @@ export function ExplorerPage() {
     setSector('');
     setCity('');
     setStatus('');
+    setSortBy('name');
+    setSortOrder('asc');
     setPage(1);
   };
 
@@ -104,7 +107,7 @@ export function ExplorerPage() {
             <Search className="pointer-events-none absolute left-3 h-3.5 w-3.5 text-ink-400" />
             <input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => { setQuery(e.target.value); setPage(1); }}
               placeholder="Search company, parent company, description…"
               className="w-full rounded border border-border bg-surface-950 py-2 pl-9 pr-8 text-sm text-ink-100 placeholder:text-ink-400 focus:border-teal-accent/50"
               aria-label="Search companies"

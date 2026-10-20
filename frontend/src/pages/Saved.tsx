@@ -8,7 +8,7 @@ import {
   savedResearchSchema,
   savedComparisonSchema,
   cityDetailSchema,
-  type SavedResearch,
+
   type SavedComparison,
 } from '../services/schemas';
 import { Panel, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type * as ReactNS from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Sparkles, Send, AlertTriangle, Info, Quote, ExternalLink, ShieldAlert, Cpu, FlaskConical } from 'lucide-react';
 import { api } from '../services/client';
@@ -17,7 +18,8 @@ const SUGGESTIONS = [
 
 export function AssistantPage() {
   useDocumentTitle('AI Research Assistant — GCC Atlas');
-  const [input, setInput] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [input, setInput] = useState(() => searchParams.get('q') ?? '');
   const [submitted, setSubmitted] = useState<string | null>(null);
 
   const status = useQuery({
@@ -33,7 +35,10 @@ export function AssistantPage() {
   });
 
   const ask = (q: string) => {
-    if (q.trim().length >= 3) setSubmitted(q.trim());
+    if (q.trim().length >= 3) {
+      setSubmitted(q.trim());
+      if (searchParams.get('q')) setSearchParams({}, { replace: true });
+    }
   };
 
   return (

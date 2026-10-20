@@ -29,18 +29,22 @@ export function SourcesPage() {
   useDocumentTitle('Sources & Evidence — GCC Atlas');
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
+  const [confidence, setConfidence] = useState('');
   const [type, setType] = useState('');
   const [page, setPage] = useState(1);
+
+  const filtersActive = Boolean(query || status || confidence || type);
 
   const params = useMemo(
     () => ({
       query: query || undefined,
       verification_status: status || undefined,
+      confidence_level: confidence || undefined,
       source_type: type || undefined,
       page,
       page_size: PAGE_SIZE,
     }),
-    [query, status, type, page],
+    [query, status, confidence, type, page],
   );
 
   const sources = useQuery({
@@ -86,6 +90,14 @@ export function SourcesPage() {
             <option value="conflicting">Conflicting</option>
           </select>
 
+          <select value={confidence} onChange={(e) => { setConfidence(e.target.value); setPage(1); }} aria-label="Filter by confidence level"
+            className="rounded border border-border bg-surface-950 px-2.5 py-2 text-sm text-ink-100">
+            <option value="">Any confidence</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+
           <select value={type} onChange={(e) => { setType(e.target.value); setPage(1); }} aria-label="Filter by source type"
             className="rounded border border-border bg-surface-950 px-2.5 py-2 text-sm text-ink-100">
             <option value="">Any type</option>
@@ -93,6 +105,15 @@ export function SourcesPage() {
               <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>
             ))}
           </select>
+
+          {filtersActive ? (
+            <button
+              onClick={() => { setQuery(''); setStatus(''); setConfidence(''); setType(''); setPage(1); }}
+              className="rounded border border-amber-flag/30 bg-amber-flag/10 px-3 py-2 text-xs font-medium text-amber-flag hover:bg-amber-flag/20"
+            >
+              Reset filters
+            </button>
+          ) : null}
         </div>
         {sources.data ? (
           <p className="mt-3 text-xs text-ink-400">{sources.data.total} source records match · page {sources.data.page} of {sources.data.total_pages}</p>
@@ -159,7 +180,11 @@ function SourceCard({ source }: { source: Source }) {
               {source.verification_status === 'verified' ? <ShieldCheck className="h-2.5 w-2.5" /> : <ShieldAlert className="h-2.5 w-2.5" />}
               {source.verification_status}
             </Badge>
+            <Badge tone={source.confidence_level === 'high' ? 'cyan' : source.confidence_level === 'medium' ? 'neutral' : 'amber'}>
+              {source.confidence_level} conf.
+            </Badge>
             <span className="text-[10px] text-ink-400">
+              {source.publisher ? `${source.publisher} · ` : ''}
               {source.publication_date ? `Published ${source.publication_date} · ` : ''}Last verified {source.last_verified_date.slice(0, 10)}
             </span>
           </div>

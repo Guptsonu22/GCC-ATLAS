@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { keepPreviousData } from '@tanstack/react-query';
 import { z } from 'zod';
-import { Building2, MapPin, Handshake, Scale, X } from 'lucide-react';
+import { Search, Building2, MapPin, Handshake, Scale, X } from 'lucide-react';
 import { api } from '../services/client';
 import {
   companiesResponseSchema,

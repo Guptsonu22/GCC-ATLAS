@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Check, Trash2, Link2, Download, BookmarkPlus, FileSpreadsheet, Loader2 } from 'lucide-react';
@@ -69,7 +69,6 @@ export function CompareWorkspacePage() {
 
   const cities = citiesQuery.data ?? [];
 
-  return (
   const savedQuery = useQuery({
     queryKey: ['saved-comparisons-list'],
     queryFn: async () => savedCompareListSchema.parse((await api.get('/saved-comparisons')).data).data,
@@ -143,8 +142,6 @@ export function CompareWorkspacePage() {
     a.click();
     URL.revokeObjectURL(url);
   };
-
-  const cities = citiesQuery.data ?? [];
 
   return (
     <div className="space-y-5">

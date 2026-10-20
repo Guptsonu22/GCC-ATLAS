@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Search, X, ChevronLeft, ChevronRight, MapPin, CheckCircle2, ExternalLink, ShieldCheck, ClipboardList } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, MapPin, CheckCircle2, ExternalLink, ShieldCheck, ClipboardList, RotateCcw } from 'lucide-react';
 
 import { api } from '../services/client';
 import { providersResponseSchema, type Provider } from '../services/schemas';
@@ -21,8 +22,10 @@ const PAGE_SIZE = 10;
 
 export function ProvidersPage() {
   useDocumentTitle('Service Providers — GCC Atlas');
+  const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
+  const [verified, setVerified] = useState('');
   const [page, setPage] = useState(1);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
 
@@ -30,10 +33,11 @@ export function ProvidersPage() {
     () => ({
       query: query || undefined,
       category: category || undefined,
+      is_verified: verified === '' ? undefined : verified,
       page,
       page_size: PAGE_SIZE,
     }),
-    [query, category, page],
+    [query, category, verified, page],
   );
 
   const providers = useQuery({
@@ -43,6 +47,25 @@ export function ProvidersPage() {
   });
 
   const totalPages = providers.data?.total_pages ?? 1;
+  const filtersActive = Boolean(query || category || verified);
+
+  const resetFilters = () => {
+    setQuery(''); setCategory(''); setVerified(''); setPage(1);
+    if (searchParams.get('focus')) setSearchParams({}, { replace: true });
+  };
+
+  // Deep-link support: /providers?focus=<id> opens that provider's drawer.
+  const providersData = providers.data?.data ?? null;
+  useEffect(() => {
+    const focusId = searchParams.get('focus');
+    if (focusId && providersData) {
+      const match = providersData.find((p) => p.id === focusId);
+      if (match) {
+        setSelectedProvider(match);
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [providersData, searchParams, setSearchParams]);
 
   return (
     <div className="space-y-5">
@@ -114,7 +137,20 @@ export function ProvidersPage() {
                 <div>
                   <h3 className="text-[14px] font-semibold text-ink-100 group-hover:text-teal-accent">{p.name}</h3>
                   <p className="mt-0.5 text-xs text-ink-400">{p.subcategory ?? p.category.replace('_', ' ')}</p>
-                </div>
+          <select value={verified} onChange={(e) => { setVerified(e.target.value); setPage(1); }} aria-label="Filter by verification status"
+            className="rounded border border-border bg-surface-950 px-2.5 py-2 text-sm text-ink-100">
+            <option value="">Any verification</option>
+            <option value="true">Verified only</option>
+            <option value="false">Pending verification</option>
+          </select>
+
+          {filtersActive || searchParams.get('focus') ? (
+            <button onClick={resetFilters}
+              className="flex items-center gap-1.5 rounded border border-amber-flag/30 bg-amber-flag/10 px-3 py-2 text-xs font-medium text-amber-flag hover:bg-amber-flag/20">
+              <RotateCcw className="h-3 w-3" aria-hidden /> Reset filters
+            </button>
+          ) : null}
+        </div>
                 <Badge tone={p.is_verified ? 'teal' : 'amber'}>
                   <CheckCircle2 className="h-2.5 w-2.5" /> {p.is_verified ? 'verified' : 'pending'}
                 </Badge>
