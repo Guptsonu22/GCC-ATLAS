@@ -122,19 +122,51 @@ export function DashboardPage() {
         </Panel>
       </div>
 
-      {/* Freshness + recent announcements */}
+      {/* Freshness + verification buckets */}
       <div className="grid gap-5 xl:grid-cols-2">
         <Panel>
           <PanelHeader title="Data coverage & freshness" subtitle="Evidence hygiene of the dataset" />
           <div className="grid grid-cols-2 gap-px bg-border">
             <FreshnessCell label="Sources verified ≤ 30 days" value={s.data_freshness.sources_verified_last_30_days} tone="teal" />
             <FreshnessCell label="Sources verified ≤ 90 days" value={s.data_freshness.sources_verified_last_90_days} tone="cyan" />
-            <FreshnessCell label="Unverified sources" value={s.data_freshness.unverified_sources ?? s.data_freshness.stale_sources} tone="amber" />
+            <FreshnessCell label={`Stale sources (>365d)`} value={s.data_freshness.stale_sources} tone="amber" />
             <FreshnessCell label="Total sources on file" value={s.total_sources} tone="neutral" />
           </div>
+          {s.policies_by_state ? (
+            <div className="border-t border-border px-5 py-3">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-400">Policy coverage by state ({s.total_policies ?? 0} policies)</p>
+              <div className="flex flex-wrap gap-1.5">
+                {s.policies_by_state.map((row) => (
+                  <Badge key={row.state} tone={row.count > 0 ? 'cyan' : 'neutral'}>
+                    {row.state} · {row.count}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <Link to="/sources" className="block border-t border-border px-5 py-3 text-xs font-medium text-teal-accent hover:bg-surface-850">
             Browse source records →
           </Link>
+        </Panel>
+
+        <Panel>
+          <PanelHeader
+            title="Verification ledger"
+            subtitle="Record-level evidence buckets — definitions documented in data/data-dictionary.md"
+          />
+          {s.companies_verification && s.policies_verification ? (
+            <>
+              <VerificationRows title="Companies" buckets={s.companies_verification} />
+              <div className="border-t border-border">
+                <VerificationRows title="Policy records" buckets={s.policies_verification} />
+              </div>
+              <p className="border-t border-border px-5 py-3 text-[11px] leading-relaxed text-ink-400">
+                {s.verification_definitions ?? 'verified = cited source verified within 365 days; awaiting = no verified source yet; stale = only stale sources remain; conflicting = flagged for manual review.'}
+              </p>
+            </>
+          ) : (
+            <EmptyState title="Verification breakdown unavailable" hint="Run the import pipeline to populate verification buckets." />
+          )}
         </Panel>
 
         <Panel>
@@ -214,6 +246,39 @@ function FreshnessCell({ label, value, tone }: { label: string; value: number; t
         <span className={`font-mono text-xl font-semibold ${tone === 'amber' ? 'text-amber-flag' : tone === 'teal' ? 'text-teal-accent' : 'text-ink-100'}`}>{value}</span>
         {tone === 'amber' && value > 0 ? <Badge tone="amber">verify</Badge> : null}
       </p>
+    </div>
+  );
+}
+
+interface VerificationBuckets {
+  verified: number;
+  awaiting_verification: number;
+  stale: number;
+  conflicting: number;
+  total: number;
+}
+
+function VerificationRows({ title, buckets }: { title: string; buckets: VerificationBuckets }) {
+  const rows: { label: string; value: number; tone: string }[] = [
+    { label: 'Verified', value: buckets.verified, tone: 'text-teal-accent' },
+    { label: 'Awaiting verification', value: buckets.awaiting_verification, tone: 'text-amber-flag' },
+    { label: 'Stale evidence', value: buckets.stale, tone: 'text-amber-flag' },
+    { label: 'Conflicting', value: buckets.conflicting, tone: 'text-rose-flag' },
+  ];
+  return (
+    <div className="px-5 py-3">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-400">{title} — {buckets.total} tracked</p>
+      <div className="space-y-1.5">
+        {rows.map((r) => (
+          <div key={r.label} className="flex items-center gap-3">
+            <span className="w-40 shrink-0 text-xs text-ink-300">{r.label}</span>
+            <div className="h-2 flex-1 overflow-hidden rounded-sm bg-surface-800">
+              <div className="h-full rounded-sm bg-current bg-opacity-70" style={{ width: `${buckets.total ? (r.value / buckets.total) * 100 : 0}%`, color: r.tone.includes('teal') ? '#2dd4bf' : r.tone.includes('rose') ? '#fb7185' : '#fbbf24' }} />
+            </div>
+            <span className={`w-8 text-right font-mono text-xs ${r.value === 0 ? 'text-ink-400' : r.tone}`}>{r.value}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

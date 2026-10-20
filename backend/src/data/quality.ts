@@ -38,6 +38,7 @@ export function isStale(lastVerifiedDate: string | null | undefined, now: Date =
 const LEGAL_SUFFIXES = [
   'private limited', 'pvt ltd', 'pvt. ltd.', 'limited', 'ltd', 'ltd.', 'inc', 'inc.',
   'llp', 'plc', 'corp', 'corp.', 'corporation', 'co', 'co.', 'company', 'group', 'ag', 'se', 'nv',
+  'pvt', 'private',
 ];
 
 /**

@@ -176,6 +176,28 @@ describe('API integration', () => {
     expect(announcements.body.total).toBeGreaterThan(5);
   });
 
+  it('source-records detail exposes reverse usage for the evidence explorer', async () => {
+    const cited = await request(app).get('/api/source-records/src_tn_gov');
+    expect(cited.status).toBe(200);
+    expect(cited.body.source.id).toBe('src_tn_gov');
+    expect(cited.body.usage.policies.some((p: { id: string }) => p.id === 'pol_tamilnadu')).toBe(true);
+    expect(cited.body.usage.announcements.length).toBeGreaterThan(0);
+
+    const unknown = await request(app).get('/api/source-records/src_missing');
+    expect(unknown.status).toBe(404);
+    expect(unknown.body.error.code).toBe('not_found');
+  });
+
+  it('dashboard stats include record-level verification buckets', async () => {
+    const res = await request(app).get('/api/dashboard/stats');
+    expect(res.status).toBe(200);
+    const v = res.body.companies_verification;
+    expect(v.total).toBe(res.body.total_companies);
+    expect(v.verified + v.awaiting_verification + v.stale + v.conflicting).toBe(v.total);
+    expect(res.body.policies_verification.awaiting_verification).toBeGreaterThanOrEqual(2);
+    expect(res.body.verification_definitions).toMatch(/365/);
+  });
+
   it('policies endpoint returns status-linked records with filters', async () => {
     const all = await request(app).get('/api/policies');
     expect(all.status).toBe(200);

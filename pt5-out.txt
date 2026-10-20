@@ -8,58 +8,17 @@ Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
 
 [1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90mC:/Users/Sonu/OneDrive/Desktop/GCC ATLAS/backend[39m
 
- [32m✓[39m tests/assistant.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 283[2mms[22m[39m
- [32m✓[39m tests/repositories.test.ts [2m([22m[2m19 tests[22m[2m)[22m[33m 331[2mms[22m[39m
- [31m❯[39m tests/phase5-data-quality.test.ts [2m([22m[2m26 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1152[2mms[22m[39m
-     [32m✓[39m rule 1: rejects non-https citations[32m 8[2mms[22m[39m
-     [32m✓[39m rule 2: unverified new-center announcement cannot coincide with an operational year[32m 2[2mms[22m[39m
-     [32m✓[39m rule 2: future established years are rejected[32m 1[2mms[22m[39m
-     [32m✓[39m rule 3: a company backed only by general offices is rejected[32m 1[2mms[22m[39m
-     [32m✓[39m rule 4: similarly named companies collide unless registered as distinct[32m 2[2mms[22m[39m
-     [32m✓[39m rule 5: mixing metric units across cities is rejected[32m 1[2mms[22m[39m
-     [32m✓[39m rule 6: an expired policy must not be flagged currently applicable[32m 1[2mms[22m[39m
-     [32m✓[39m rule 8: placeholder/example sources cannot back real records and must be labeled[32m 1[2mms[22m[39m
-     [32m✓[39m rule 9: conflicting sources must explain the conflict[32m 2[2mms[22m[39m
-     [32m✓[39m missing sources: citing an unknown source aborts the import[32m 2[2mms[22m[39m
-     [32m✓[39m stale evidence: sources verified more than 365 days ago are flagged[32m 2[2mms[22m[39m
-[31m     [31m×[31m normalizeCompanyName strips suffixes, brackets and punctuation[39m[32m 19[2mms[22m[39m
-     [32m✓[39m isStale treats missing/invalid dates as stale and honors the 365-day window[32m 1[2mms[22m[39m
-     [32m✓[39m isDemonstrativeSource detects placeholder/example records[32m 1[2mms[22m[39m
-     [32m✓[39m registries cover the tracked metric names and GCC office types[32m 1[2mms[22m[39m
-     [32m✓[39m passes validation with zero errors[32m 9[2mms[22m[39m
-     [32m✓[39m running the import twice yields identical row counts (no duplicates)[32m 178[2mms[22m[39m
-     [32m✓[39m upsert refreshes curated content for an existing stable id instead of duplicating[32m 153[2mms[22m[39m
-     [33m[2m✓[22m[39m company_locations and source_records stay unique on rerun [33m 333[2mms[22m[39m
-     [32m✓[39m saved_research rows survive re-imports (user data untouched)[32m 155[2mms[22m[39m
-     [32m✓[39m companies break into verified/awaiting/stale/conflicting over the seeded data[32m 9[2mms[22m[39m
-     [32m✓[39m policies verification flags the unverified state frameworks[32m 4[2mms[22m[39m
-     [32m✓[39m coverage arrays include cities and states plus the documented definitions[32m 4[2mms[22m[39m
-     [32m✓[39m a cited source lists the records that rely on it[32m 6[2mms[22m[39m
-     [32m✓[39m an uncited source reports empty usage[32m 2[2mms[22m[39m
-     [32m✓[39m returns undefined for unknown sources[32m 1[2mms[22m[39m
- [32m✓[39m tests/api.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 653[2mms[22m[39m
+ [32m✓[39m tests/assistant.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 970[2mms[22m[39m
+ [32m✓[39m tests/repositories.test.ts [2m([22m[2m19 tests[22m[2m)[22m[33m 818[2mms[22m[39m
+ [32m✓[39m tests/phase5-data-quality.test.ts [2m([22m[2m26 tests[22m[2m)[22m[33m 3302[2mms[22m[39m
+     [33m[2m✓[22m[39m running the import twice yields identical row counts (no duplicates) [33m 368[2mms[22m[39m
+     [33m[2m✓[22m[39m upsert refreshes curated content for an existing stable id instead of duplicating [33m 364[2mms[22m[39m
+     [33m[2m✓[22m[39m company_locations and source_records stay unique on rerun [33m 894[2mms[22m[39m
+     [33m[2m✓[22m[39m saved_research rows survive re-imports (user data untouched) [33m 612[2mms[22m[39m
+ [32m✓[39m tests/api.test.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 2224[2mms[22m[39m
 
-[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
-
-[41m[1m FAIL [22m[49m tests/phase5-data-quality.test.ts[2m > [22mpure quality helpers[2m > [22mnormalizeCompanyName strips suffixes, brackets and punctuation
-[31m[1mAssertionError[22m: expected 'abc consultants pvt' to be 'abc consultants' // Object.is equality[39m
-
-Expected: [32m"abc consultants"[39m
-Received: [31m"abc consultants[7m pvt[27m"[39m
-
-[36m [2m❯[22m tests/phase5-data-quality.test.ts:[2m170:63[22m[39m
-    [90m168|[39m     expect(normalizeCompanyName('Novartis India (GDD Hyderabad)')).toB…
-    [90m169|[39m     expect(normalizeCompanyName('Target Corporation India')).toBe('tar…
-    [90m170|[39m     expect(normalizeCompanyName('ABC Consultants Pvt. Ltd.')).toBe('ab…
-    [90m   |[39m                                                               [31m^[39m
-    [90m171|[39m     [34mexpect[39m([34mnormalizeCompanyName[39m([32m'IBM India'[39m))[33m.[39m[34mtoBe[39m([32m'ibm india'[39m)[33m;[39m
-    [90m172|[39m   })[33m;[39m
-
-[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
-
-
-[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
-[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m66 passed[39m[22m[90m (67)[39m
-[2m   Start at [22m 13:13:34
-[2m   Duration [22m 2.50s[2m (transform 1.34s, setup 0ms, import 3.59s, tests 2.42s, environment 1ms)[22m
+[2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[32m69 passed[39m[22m[90m (69)[39m
+[2m   Start at [22m 13:15:10
+[2m   Duration [22m 7.49s[2m (transform 4.68s, setup 0ms, import 11.79s, tests 7.31s, environment 3ms)[22m
 
