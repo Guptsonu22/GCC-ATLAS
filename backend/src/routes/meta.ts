@@ -61,11 +61,11 @@ export function metaRoutes(db: Database): Router {
 
   router.get('/source-records/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const source = await sourceRecordsRepo.getSourceRecord(req.params.id as string);
-      if (!source) {
+      const usage = await sourceRecordsRepo.getSourceUsage(req.params.id as string);
+      if (!usage) {
         return void res.status(404).json({ error: { code: 'not_found', message: `Source '${req.params.id}' not found` } });
       }
-      res.json(source);
+      res.json(usage);
     } catch (err) {
       next(err);
     }

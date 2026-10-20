@@ -47,16 +47,17 @@ const LEGAL_SUFFIXES = [
  * is never disabled wholesale.
  */
 export function normalizeCompanyName(name: string): string {
-  const cleaned = name
+  let cleaned = name
     .toLowerCase()
     .replace(/\(.*\)/g, ' ')      // drop bracketed qualifiers e.g. "Novartis India (GDD Hyderabad)"
     .replace(/[^a-z0-9\s]/g, ' ') // punctuation -> space
     .trim();
   let words = cleaned.split(/\s+/).filter(Boolean);
-  while (words.length > 1 && LEGAL_SUFFIXES.includes(words[words.length - 1]!)) {
-    words = words.slice(0, -1);
-  }
-  return words.join(' ');
+  // strip legal-form tokens anywhere in the name ("Target Corporation India" -> "target india")
+  words = words.filter((w) => !LEGAL_SUFFIXES.includes(w));
+  cleaned = words.join(' ');
+  words = cleaned.split(/\s+/).filter(Boolean);
+  return words.filter(Boolean).join(' ');
 }
 
 /** Collisions reviewed manually and confirmed to be DISTINCT entities (id pairs allowed to share a normalized name). */
@@ -174,7 +175,7 @@ export const ROW_SCHEMAS = {
     operating_locations: z.array(z.string().min(3)).min(1),
     capabilities: z.array(z.string().min(3)).min(1),
     case_studies: z.array(z.unknown()).nullable(),
-    founded_year: z.number().int().min(1800).max(2100).nullable(),
+    founded_year: z.number().int().min(1700).max(2100).nullable(), // global founding year (JLL lineage goes back to 1783)
     employee_count: z.number().int().positive().nullable(),
     is_verified: z.number().int().min(0).max(1),
     verification_notes: z.string().nullable(),
@@ -380,6 +381,15 @@ export function validateSeedDataset(data: SeedDataset, now: Date = new Date()): 
   }
 
   // ---- rule 2: announced-but-not-operational centers cannot carry established years
+  // (future established years are invalid for ANY company location)
+  const thisYear = now.getFullYear();
+  for (const c of data.companies) {
+    for (const loc of c.locations) {
+      if (loc.established_year && loc.established_year > thisYear) {
+        errors.push(`company ${c.id} (${loc.location_id}): location has a future established year (rule 2)`);
+      }
+    }
+  }
   for (const a of data.announcements) {
     if (a.announcement_type === 'new_center' && a.is_verified === 0 && a.company_id && a.location_id) {
       const company = data.companies.find((c) => c.id === a.company_id);
@@ -392,7 +402,7 @@ export function validateSeedDataset(data: SeedDataset, now: Date = new Date()): 
     if (a.announcement_type === 'new_center' && a.company_id && a.location_id) {
       const company = data.companies.find((c) => c.id === a.company_id);
       const loc = company?.locations.find((l) => l.location_id === a.location_id);
-      if (loc?.established_year && loc.established_year > now.getFullYear()) {
+      if (loc?.established_year && loc.established_year > thisYear) {
         errors.push(`announcement ${a.id}: new center has a future established year (rule 2)`);
       }
     }

@@ -62,11 +62,11 @@ function metaRoutes(db) {
     });
     router.get('/source-records/:id', async (req, res, next) => {
         try {
-            const source = await sourceRecordsRepo.getSourceRecord(req.params.id);
-            if (!source) {
+            const usage = await sourceRecordsRepo.getSourceUsage(req.params.id);
+            if (!usage) {
                 return void res.status(404).json({ error: { code: 'not_found', message: `Source '${req.params.id}' not found` } });
             }
-            res.json(source);
+            res.json(usage);
         }
         catch (err) {
             next(err);
