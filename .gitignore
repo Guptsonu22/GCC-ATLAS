@@ -28,6 +28,7 @@ coverage/
 *.log
 npm-debug.log*
 
-# OS noise
+# OS / local tool noise
 .DS_Store
 Thumbs.db
+powershell.cmd
