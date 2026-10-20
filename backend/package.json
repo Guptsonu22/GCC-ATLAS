@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "build": "tsc && node scripts/copy-schema.js",
+    "build": "tsc && node scripts/copy-schema.js && node scripts/rebuild-sqlite-linux.js",
     "seed": "tsx src/db/seed.ts",
     "lint": "oxlint src tests",
     "typecheck": "tsc --noEmit",
