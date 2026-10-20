@@ -101,6 +101,18 @@ function metaRoutes(db) {
             next(err);
         }
     });
+    router.get('/policies/:id', async (req, res, next) => {
+        try {
+            const policy = await policiesRepo.getPolicy(req.params.id);
+            if (!policy) {
+                return void res.status(404).json({ error: { code: 'not_found', message: `Policy '${req.params.id}' not found` } });
+            }
+            res.json(policy);
+        }
+        catch (err) {
+            next(err);
+        }
+    });
     return router;
 }
 //# sourceMappingURL=meta.js.map

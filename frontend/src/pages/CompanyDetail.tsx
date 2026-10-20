@@ -2,15 +2,10 @@ import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ExternalLink, CalendarDays, MapPin, ShieldCheck, ShieldAlert, Quote, Building2, Briefcase } from 'lucide-react';
-import { z } from 'zod';
 import { api } from '../services/client';
-import { companySchema, announcementSchema } from '../services/schemas';
+import { companyDetailComposedSchema, announcementSchema } from '../services/schemas';
 import { Panel, PanelHeader, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
-
-const companyDetailComposedSchema = z.object({
-  company: companySchema,
-});
 
 const STATUS_TONES: Record<string, 'teal' | 'cyan' | 'amber' | 'rose' | 'neutral'> = {
   expanding: 'teal',

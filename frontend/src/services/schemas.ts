@@ -120,6 +120,11 @@ export const cityDetailSchema = z.object({
   policies: z.array(policyRecordSchema).optional(),
 });
 
+/** Shape returned by GET /companies/:id (backend nests the record under `company`). */
+export const companyDetailComposedSchema = z.object({
+  company: companySchema,
+});
+
 export const capabilitySchema = z.object({
   capability: z.string(),
   source_id: z.string().nullable().optional(),
