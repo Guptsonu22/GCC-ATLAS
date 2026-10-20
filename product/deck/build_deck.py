@@ -106,8 +106,8 @@ def kpi(slide, x, y, w, h, num, label, sub, ncol=TEAL):
     txt(slide, x + 0.18, y + h - 0.55, w - 0.34, 0.5, sub, size=8.5, color=RGBColor(0x64, 0x74, 0x8B), leading=0.95)
 
 def tag(slide, x, y, text, color=AMBER, tc=BG):
-    sh = rect(slide, x, y, 0.12 + len(text) * 0.082, 0.28, fill=color, radius=True)
-    txt(slide, x + 0.05, y + 0.015, 0.16 + len(text) * 0.082, 0.25, text, size=9.5, bold=True, color=tc)
+    sh = rect(slide, x, y, 0.2 + len(text) * 0.096, 0.28, fill=color, radius=True)
+    txt(slide, x + 0.1, y + 0.015, 0.2 + len(text) * 0.096, 0.25, text, size=9.5, bold=True, color=tc)
     return sh
 
 def pic_panel(slide, img, x, y, w, h, caption, cap_color=MUT):
@@ -134,10 +134,10 @@ s = prs.slides.add_slide(BLANK)
 rect(s, 0, 0, 13.333, 7.5, fill=BG, radius=False)
 rect(s, 0, 0, 0.14, 7.5, fill=TEAL, radius=False)
 txt(s, 0.85, 1.65, 11.0, 0.4, 'FLEXIPLE PRODUCT INTERN ASSIGNMENT · PRE-ALPHA PROTOTYPE', size=12.5, color=TEAL, bold=True)
-txt(s, 0.85, 2.05, 11.6, 1.7, [('GCC Atlas — India\u2019s GCC ecosystem, made searchable.', {})], size=44, bold=True)
+txt(s, 0.85, 2.0, 11.6, 1.35, [('GCC Atlas — India\u2019s GCC ecosystem, made searchable.', {})], size=39, bold=True)
 txt(s, 0.85, 3.42, 11.2, 0.8, 'Provenance-first city, policy and company comparison for India capability-centre decisions:\nevery number carries its source, its date, and its counting denominator.', size=16, color=MUT, leading=1.15)
 tag(s, 0.85, 4.45, 'WORKING TITLE — name collision flagged (S38)', color=AMBER)
-tag(s, 3.6, 4.45, 'COMPOSITES FROM EVIDENCE — NO INTERVIEWS CONDUCTED', color=RED)
+tag(s, 7.05, 4.62, 'COMPOSITES FROM EVIDENCE — NO INTERVIEWS CONDUCTED', color=RED)
 # stat chips
 y = 5.15
 for i, (num, lbl, src) in enumerate([('2,117', 'GCCs (parent-level)', 'FY2026 · S01/S02'), ('3,728', 'GCC units', 'FY2026 · S01'), ('39%', 'of 2025 office absorption', 'CBRE · S20'), ('$98.4B', 'GCC revenue FY26', 'Nasscom–Zinnov · S02')]):
@@ -292,10 +292,10 @@ txt(s, 0.55, 6.9, 12.2, 0.3, 'All coverage claims are dataset-scope-labelled; th
 # ============================================================================
 s = prs.slides.add_slide(BLANK)
 chrome(s, 8, 'Product walkthrough — genuine prototype captures', 'SCREENSHOTS (headless-browser captures of the running build)')
-pic_panel(s, 'compare.png', 0.55, 1.55, 7.55, 2.62, 'Compare Workspace: Bengaluru vs Pune — EST flags, metric definitions, provenance chips, save/copy-link.')
-pic_panel(s, 'assistant-answer.png', 8.25, 1.55, 4.53, 2.62, 'Assistant: structured, cited answer (demo mode).')
-pic_panel(s, 'sources.png', 0.55, 4.6, 7.55, 2.3, 'Sources: publisher, confidence, verification date + reverse "where used" per source.')
-pic_panel(s, 'dashboard.png', 8.25, 4.6, 4.53, 2.3, 'Dashboard: dataset-scope counters + verification ledger.')
+pic_panel(s, 'compare.png', 0.55, 1.55, 7.55, 2.5, 'Compare Workspace: Bengaluru vs Pune — EST flags, metric definitions, provenance chips, save/copy-link.')
+pic_panel(s, 'assistant-answer.png', 8.25, 1.55, 4.53, 2.5, 'Assistant: structured, cited answer (demo mode).')
+pic_panel(s, 'sources.png', 0.55, 4.55, 7.55, 2.24, 'Sources: publisher, confidence, verification date + reverse "where used" per source.')
+pic_panel(s, 'dashboard.png', 8.25, 4.55, 4.53, 2.24, 'Dashboard: dataset-scope counters + verification ledger.')
 
 # ============================================================================
 # SLIDE 9 — Positioning & adoption
@@ -359,8 +359,8 @@ bullets(s, 7.05, 2.2, 5.6, 2.4, [
 ], size=11, gap=8)
 mets = [('M1', 'Time-to-answer < 10 min [proposal]'), ('M2', '100% of displayed figures carry sources (hard invariant); assistant ≥95% answered w/ ≥1 citation [proposal]'), ('M3', 'Search→detail ≥40% [proposal]'), ('M4-M6', 'compare/assistant/provider engagement + no-paid-ranking guardrail countermetrics')]
 for i, (m, b) in enumerate(mets):
-    txt(s, 7.05, 4.72 + i * 0.5, 0.8, 0.35, m, size=11, bold=True, color=AMBER)
-    txt(s, 7.85, 4.72 + i * 0.5, 4.85, 0.5, b, size=10, color=MUT, leading=1.0)
+    txt(s, 7.05, 4.62 + i * 0.58, 0.9, 0.35, m, size=11, bold=True, color=AMBER)
+    txt(s, 7.95, 4.62 + i * 0.58, 4.75, 0.56, b, size=10, color=MUT, leading=1.0)
 
 # ============================================================================
 # SLIDE 12 — Roadmap & close
