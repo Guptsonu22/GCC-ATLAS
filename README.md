@@ -103,6 +103,32 @@ npm run seed -- --check   # validate only, exit 1 on any data-quality error
   → `usage`), rendered on the Sources page.
 - Definitions for tracked/verified/awaiting/stale/conflicting live in `data/data-dictionary.md`.
 
+## Deployment (Phase 9)
+
+**No public deployment was performed** — no hosting credentials were available at build time.
+Everything needed to deploy is prepared and cannot run without access to the user's cloud accounts:
+
+- `deployment/deployment-guide.md` — exact Render + Railway (+Fly) runbooks: env vars incl.
+  prod CORS allowlist, persistent SQLite disk (`DB_PATH=/data/gcc-atlas.db`), first-boot
+  auto-seeding (no migration step — `ensureSeeded()` creates+seeds an empty DB), health
+  probe (`/api/health`), logs, and the post-deploy verification checklist.
+- `deployment/render.yaml` — one-click Render Blueprint (API web service + persistent disk +
+  static frontend rewrite routes).
+- Frontend points at the deployed API via build-time `VITE_API_BASE_URL` (defaults to
+  same-origin `/api`); set `CORS_ORIGIN` to the frontend origin on the backend.
+- `deployment/demo-walkthrough.md` — 8-step reviewer script.
+
+## Phase 9 deliverables (strategy deck)
+
+- `product/deck/gcc-atlas-strategy-deck.pptx` — editable 12-slide 16:9 deck (product theme,
+  genuine headless-browser screenshots of the running prototype, native score chart).
+- `product/deck/gcc-atlas-strategy-deck.pdf` — PDF export (12 pages).
+- `product/deck-evidence-sources.md` — every quantitative claim in the deck mapped to its
+  `research/source-register.csv` ID; hypotheses/inferences labelled inline.
+- `qa/quality-report.md` — Phase 8 QA: 94 backend + 14 frontend tests green, live journey
+  probes against the real build, 4 bugs found & fixed with regression tests.
+- Images used in the deck are also archived under `qa/deck-assets/`.
+
 ## Known limitations
 
 - Assistant demo mode is deterministic (dataset answers, no external calls).
