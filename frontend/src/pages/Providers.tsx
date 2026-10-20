@@ -129,7 +129,7 @@ export function ProvidersPage() {
           <select value={location} onChange={(e) => { setLocation(e.target.value); setPage(1); }} aria-label="Filter by city presence"
             className="rounded border border-border bg-surface-950 px-2.5 py-2 text-sm text-ink-100">
             <option value="">Any city presence</option>
-            {cities.map((c) => (
+            {cities.data?.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>

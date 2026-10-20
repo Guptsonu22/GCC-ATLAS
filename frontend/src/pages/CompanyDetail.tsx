@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { ExternalLink, CalendarDays, MapPin, ShieldCheck, ShieldAlert, Quote, Building2, Briefcase } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ExternalLink, CalendarDays, MapPin, ShieldCheck, ShieldAlert, Quote, Building2, Briefcase, BookmarkPlus, Loader2 } from 'lucide-react';
 import { z } from 'zod';
-import { api } from '../services/client';
+import { api, track } from '../services/client';
 import { companyDetailComposedSchema, announcementSchema } from '../services/schemas';
 import { Panel, PanelHeader, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -48,6 +48,33 @@ export function CompanyDetailPage() {
     enabled: companyId !== '',
   });
 
+  const queryClient = useQueryClient();
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+  const saveForLater = async (companyName: string) => {
+    setSaveState('saving');
+    setSaveMessage(null);
+    try {
+      await api.post('/saved-research', {
+        name: `${companyName} — company profile`,
+        type: 'company_comparison',
+        data: { company_id: companyId },
+      });
+      setSaveState('saved');
+      setSaveMessage(`Saved “${companyName} — company profile” to your session. Find it under Saved.`);
+      track('saved_create', { kind: 'company_profile', ref: companyId });
+      queryClient.invalidateQueries({ queryKey: ['saved-research-list'] });
+    } catch (err) {
+      setSaveState('error');
+      setSaveMessage((err as Error).message);
+    }
+  };
+
+  useEffect(() => {
+    if (company.data) track('detail_view', { kind: 'company', ref: companyId });
+  }, [company.data, companyId]);
+
   useEffect(() => {
     if (company.isError) window.scrollTo(0, 0);
   }, [company.isError]);
@@ -74,18 +101,38 @@ export function CompanyDetailPage() {
           'No profile description on file for this company yet — its locations and sources below are still verified records.'
         }
         right={
-          c.website ? (
-            <a
-              href={c.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded border border-border bg-surface-800 px-3 py-1.5 text-xs text-ink-200 hover:border-teal-accent/40 hover:text-teal-accent"
+          <>
+            <button
+              onClick={() => { void saveForLater(c.name); }}
+              disabled={saveState === 'saving' || saveState === 'saved'}
+              className="rounded border border-teal-accent/40 bg-teal-accent/10 px-3 py-1.5 text-xs font-medium text-teal-accent hover:bg-teal-accent/20 disabled:opacity-50"
+              title="Persist this company record to your anonymous session"
             >
-              Official website <ExternalLink className="h-3 w-3" aria-hidden />
-            </a>
-          ) : null
+              <span className="flex items-center gap-1.5">
+                {saveState === 'saving' ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : <BookmarkPlus className="h-3.5 w-3.5" aria-hidden />}
+                {saveState === 'saved' ? 'Saved' : 'Save to my session'}
+              </span>
+            </button>
+            {c.website ? (
+              <a
+                href={c.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 rounded border border-border bg-surface-800 px-3 py-1.5 text-xs text-ink-200 hover:border-teal-accent/40 hover:text-teal-accent"
+              >
+                Official website <ExternalLink className="h-3 w-3" aria-hidden />
+              </a>
+            ) : null}
+          </>
         }
       />
+
+      {saveState === 'saved' && saveMessage ? (
+        <p className="rounded border border-teal-accent/30 bg-teal-accent/10 px-3 py-2 text-xs text-teal-accent">{saveMessage}</p>
+      ) : null}
+      {saveState === 'error' && saveMessage ? (
+        <p className="rounded border border-rose-flag/30 bg-rose-flag/10 px-3 py-2 text-xs text-rose-flag" role="alert">{saveMessage}</p>
+      ) : null}
 
       {/* Identity band */}
       <Panel>
@@ -157,6 +204,7 @@ export function CompanyDetailPage() {
                     href={src.url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => track('source_click', { kind: 'company_source', ref: src.id })}
                     className="mt-1 inline-flex items-center gap-1 text-[11px] text-teal-accent hover:underline"
                   >
                     {src.url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 60)}

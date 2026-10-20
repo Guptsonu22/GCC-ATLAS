@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Check, Trash2, Link2, Download, BookmarkPlus, FileSpreadsheet, Loader2 } from 'lucide-react';
+import { Plus, Check, Trash2, Link2, Download, BookmarkPlus, FileSpreadsheet, Loader2, Pencil } from 'lucide-react';
 import { z } from 'zod';
-import { api } from '../services/client';
+import { api, track } from '../services/client';
 import { parseSavedIds } from '../utils/cityIds';
 import { cityDetailSchema, savedComparisonSchema, type SavedComparison } from '../services/schemas';
 import { Panel, PanelHeader, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
@@ -77,6 +77,9 @@ export function CompareWorkspacePage() {
   const [saveName, setSaveName] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [renaming, setRenaming] = useState(false);
   const [saveOk, setSaveOk] = useState<string | null>(null);
 
   const saveComparison = async () => {
@@ -94,6 +97,7 @@ export function CompareWorkspacePage() {
       });
       setSaveOk(`Saved “${(created.data as SavedComparison).name}”. Find it any time under Saved.`);
       setSaveName('');
+      track('compare_create', { city_count: String(ids.length) });
       queryClient.invalidateQueries({ queryKey: ['saved-comparisons-list'] });
     } catch (err) {
       setSaveError((err as Error).message);
@@ -136,6 +140,7 @@ export function CompareWorkspacePage() {
     }
     const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
+    track('export', { format: 'csv', city_count: String(rows.length) });
     const a = document.createElement('a');
     a.href = url;
     a.download = `gcc-comparison-${ids.join('-')}.csv`;
@@ -278,11 +283,46 @@ export function CompareWorkspacePage() {
               <ul className="divide-y divide-border">
                 {(savedQuery.data ?? []).map((s) => {
                   const savedIds = JSON.parse(s.location_ids) as string[];
+                  if (renamingId === s.id) {
+                    return (
+                      <li key={s.id} className="flex items-center gap-2 px-4 py-2.5">
+                        <input
+                          value={renameValue}
+                          onChange={(e) => setRenameValue(e.target.value)}
+                          maxLength={200}
+                          aria-label="New comparison name"
+                          className="min-w-0 flex-1 rounded border border-teal-accent/40 bg-surface-950 px-2 py-1.5 text-[13px] text-ink-100"
+                        />
+                        <button
+                          aria-label="Save new name"
+                          disabled={renaming || !renameValue.trim()}
+                          onClick={async () => {
+                            setRenaming(true);
+                            try {
+                              await api.patch(`/saved-comparisons/${s.id}`, { name: renameValue.trim() });
+                              setRenamingId(null);
+                              queryClient.invalidateQueries({ queryKey: ['saved-comparisons-list'] });
+                            } catch (err) {
+                              setSaveError((err as Error).message);
+                            } finally {
+                              setRenaming(false);
+                            }
+                          }}
+                          className="flex items-center gap-1 rounded border border-teal-accent/40 bg-teal-accent/10 px-2.5 py-1.5 text-xs font-medium text-teal-accent disabled:opacity-40"
+                        >
+                          {renaming ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden /> : <Check className="h-3 w-3" aria-hidden />} Save name
+                        </button>
+                      </li>
+                    );
+                  }
                   return (
                     <li key={s.id} className="flex items-center gap-2 px-4 py-2.5">
                       <FileSpreadsheet className="h-3.5 w-3.5 shrink-0 text-ink-400" aria-hidden />
                       <button
-                        onClick={() => setIds(savedIds)}
+                        onClick={() => {
+                          setIds(savedIds);
+                          track('compare_reopen', { source: 'saved_list', city_count: String(savedIds.length) });
+                        }}
                         className="min-w-0 flex-1 text-left"
                         title={`Load ${savedIds.length} cities into the workspace`}
                       >
@@ -290,6 +330,13 @@ export function CompareWorkspacePage() {
                         <span className="block truncate text-[10px] text-ink-400">
                           {savedIds.length} cities · saved {s.created_at.slice(0, 10)}
                         </span>
+                      </button>
+                      <button
+                        onClick={() => { setRenamingId(s.id); setRenameValue(s.name); }}
+                        aria-label={`Rename saved comparison ${s.name}`}
+                        className="rounded border border-border p-1.5 text-ink-300 hover:text-ink-100"
+                      >
+                        <Pencil className="h-3 w-3" aria-hidden />
                       </button>
                       <button
                         onClick={() => { void deleteSaved(s.id); }}

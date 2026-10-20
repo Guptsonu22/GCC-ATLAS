@@ -58,7 +58,9 @@ export const compareSchema = z.object({
   ids: z
     .string()
     .min(1)
-    .transform((v) => v.split(',').map((s) => s.trim()).filter(Boolean).slice(0, 4)),
+    .transform((v) => v.split(',').map((s) => s.trim()).filter(Boolean))
+    .refine((arr) => arr.length >= 2 && arr.length <= 4, 'Cities compare supports 2 to 4 location ids')
+    .refine((arr) => new Set(arr).size === arr.length, 'ids must be distinct'),
 });
 
 export const assistantSchema = z.object({
@@ -88,6 +90,10 @@ export const sessionKeySchema = z
   .min(8, 'X-Session-Key must be at least 8 characters')
   .max(64, 'X-Session-Key must be at most 64 characters')
   .regex(/^[A-Za-z0-9_-]+$/, 'X-Session-Key may only contain letters, digits, dashes and underscores');
+
+export const savedComparisonPatchSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+});
 
 export const savedComparisonCreateSchema = z.object({
   name: z.string().trim().min(1).max(200),

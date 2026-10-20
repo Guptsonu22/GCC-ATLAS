@@ -280,9 +280,9 @@ function SavedResearchList() {
     <div className="space-y-3">
       <Panel className="p-4">
         <p className="text-xs leading-relaxed text-ink-300">
-          Research notes are written by API workflows (for example scripted research tasks) via{' '}
-          <code className="rounded bg-surface-800 px-1 py-0.5 font-mono text-[10px] text-ink-300">POST /api/saved-research</code> with the session
-          key. City comparisons belong on the first tab.
+          Company profiles saved from a company page (“Save to my session”) land here, linked back to the full record. City comparisons belong on the
+          first tab. Items can also be written by API workflows via{' '}
+          <code className="rounded bg-surface-800 px-1 py-0.5 font-mono text-[10px] text-ink-300">POST /api/saved-research</code> with the session key.
         </p>
       </Panel>
       {research.isLoading ? (
@@ -293,30 +293,61 @@ function SavedResearchList() {
         <Panel>
           <EmptyState
             title="No research items yet"
-            hint="Items created through the saved-research API will appear here, scoped to this browser session."
+            hint="Open any company record and press “Save to my session” — it will appear here, scoped to this browser session."
           />
         </Panel>
       ) : (
-        (research.data ?? []).map((item) => (
-          <Panel key={item.id}>
-            <div className="flex items-center justify-between gap-3 px-5 py-3">
-              <div className="min-w-0">
-                <p className="truncate text-[13px] font-semibold text-ink-100">{item.name}</p>
-                <p className="text-[11px] text-ink-400">
-                  {item.type.replace(/_/g, ' ')} · created {item.created_at.slice(0, 10)}
-                </p>
+        (research.data ?? []).map((item) => {
+          const isCompanySave = item.type === 'company_comparison';
+          let companyId: string | null = null;
+          if (isCompanySave) {
+            try {
+              const parsed = JSON.parse(item.data) as { company_id?: string };
+              companyId = typeof parsed.company_id === 'string' ? parsed.company_id : null;
+            } catch {
+              companyId = null;
+            }
+          }
+          return (
+            <Panel key={item.id}>
+              <div className="flex items-center justify-between gap-3 px-5 py-3">
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-semibold text-ink-100">
+                    {isCompanySave && companyId ? (
+                      <Link to={`/companies/${companyId}`} className="text-ink-100 hover:text-teal-accent">
+                        {item.name}
+                      </Link>
+                    ) : (
+                      item.name
+                    )}
+                  </p>
+                  <p className="text-[11px] text-ink-400">
+                    {isCompanySave ? 'company profile · ' : `${item.type.replace(/_/g, ' ')} · `}
+                    created {item.created_at.slice(0, 10)}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {isCompanySave && companyId ? (
+                    <Link
+                      to={`/companies/${companyId}`}
+                      className="flex items-center gap-1 rounded border border-teal-accent/40 bg-teal-accent/10 px-2.5 py-1.5 text-[11px] font-medium text-teal-accent"
+                    >
+                      Open record <ExternalLink className="h-3 w-3" aria-hidden />
+                    </Link>
+                  ) : null}
+                  <button
+                    onClick={() => deleteMutation.mutate(item.id)}
+                    disabled={deleteMutation.isPending}
+                    className="rounded border border-rose-flag/30 p-1.5 text-rose-flag hover:bg-rose-flag/10 disabled:opacity-40"
+                    aria-label={`Delete ${item.name}`}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={() => deleteMutation.mutate(item.id)}
-                disabled={deleteMutation.isPending}
-                className="rounded border border-rose-flag/30 p-1.5 text-rose-flag hover:bg-rose-flag/10 disabled:opacity-40"
-                aria-label={`Delete ${item.name}`}
-              >
-                <Trash2 className="h-3.5 w-3.5" aria-hidden />
-              </button>
-            </div>
-          </Panel>
-        ))
+            </Panel>
+          );
+        })
       )}
     </div>
   );

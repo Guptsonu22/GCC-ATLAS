@@ -1,6 +1,6 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { createSavedComparisonsRepo } from '../repositories/saved-comparisons';
-import { savedComparisonCreateSchema, parseOr400, sessionKeySchema } from '../utils/validation';
+import { savedComparisonCreateSchema, savedComparisonPatchSchema, parseOr400, sessionKeySchema } from '../utils/validation';
 import type { Database } from 'sqlite';
 
 /**
@@ -31,8 +31,22 @@ export function savedComparisonsRoutes(db: Database): Router {
     }
   });
 
-  router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
+  router.patch('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const patch = parseOr400(savedComparisonPatchSchema, req.body);
+      const sessionKey = parseOr400(sessionKeySchema, req.headers['x-session-key']);
+      const renamed = await repo.renameComparison(req.params.id as string, sessionKey, patch.name);
+      if (!renamed) {
+        return void res.status(404).json({ error: { code: 'not_found', message: 'Saved comparison not found' } });
+      }
+      const saved = await repo.getComparison(req.params.id as string, sessionKey);
+      res.json(saved);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {    try {
       const sessionKey = parseOr400(sessionKeySchema, req.headers['x-session-key']);
       const saved = await repo.getComparison(req.params.id as string, sessionKey);
       if (!saved) {

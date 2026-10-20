@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Search, X, ChevronLeft, ChevronRight, ArrowUpDown, MapPin } from 'lucide-react';
 import { z } from 'zod';
-import { api } from '../services/client';
+import { api, track } from '../services/client';
 import { companiesResponseSchema, sectorSchema, locationSchema, type Company } from '../services/schemas';
 import { Panel, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
 import { CompanyDrawer } from '../components/CompanyDrawer';
@@ -45,6 +45,14 @@ export function ExplorerPage() {
   });
 
   const filtersActive = Boolean(query || sector || city || status);
+
+  // Debounced search beacon (PRD §3.5); fires once per settled query change.
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) return;
+    const t = setTimeout(() => track('search', { surface: 'explorer' }), 500);
+    return () => clearTimeout(t);
+  }, [query]);
   const params = useMemo(
     () => ({
       query: query || undefined,
