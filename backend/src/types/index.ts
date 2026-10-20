@@ -271,12 +271,38 @@ export interface AIQueryRequest {
   use_demo_mode?: boolean;
 }
 
+export interface AssistantComparisonTable {
+  caption: string;
+  columns: string[];
+  rows: { label: string; values: (string | null)[] }[];
+}
+
+export interface AssistantAnswer {
+  direct_answer: string;
+  key_findings: string[];
+  comparison_table: AssistantComparisonTable | null;
+  evidence_facts: { statement: string; source_ids: string[] }[];
+  recommendations: { text: string; basis: string }[];
+  assumptions: string[];
+  missing_information: string[];
+  next_step: string | null;
+}
+
+export interface AssistantRetrievalMeta {
+  matched: Record<string, number>;
+  records_included: number;
+  evidence_sources: number;
+  time_window_days: number | null;
+}
+
 export interface AIQueryResponse {
-  answer: string;
-  citations: Citation[];
-  confidence: 'high' | 'medium' | 'low';
+  mode: 'llm' | 'demo';
   is_demo_mode: boolean;
+  confidence: 'high' | 'medium' | 'low';
   insufficient_evidence: boolean;
+  answer: AssistantAnswer;
+  citations: Citation[];
+  retrieval: AssistantRetrievalMeta;
 }
 
 export interface Citation {
@@ -285,6 +311,7 @@ export interface Citation {
   url: string;
   publication_date: string | null;
   relevant_excerpt: string;
+  verification_status: string | null;
 }
 
 export interface DashboardStats {

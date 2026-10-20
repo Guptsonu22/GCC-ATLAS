@@ -1,5 +1,5 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
-import { createAssistantService } from '../services/assistant';
+import { createAssistantService } from '../services/assistant/service';
 import { assistantSchema, parseOr400 } from '../utils/validation';
 import type { Database } from 'sqlite';
 
@@ -13,7 +13,7 @@ export function assistantRoutes(db: Database): Router {
       ai_configured: hasKey,
       mode: hasKey ? 'llm' : 'deterministic-demo',
       description: hasKey
-        ? 'LLM mode: answers are generated server-side using retrieved dataset evidence, with citations.'
+        ? 'LLM mode: answers are generated server-side from a retrieved evidence pack, with citations. On provider failure the API errors honestly — it never invents output.'
         : 'Demo mode: no AI key configured. Answers are composed deterministically from the local dataset. Configure AI_API_KEY on the server to enable LLM mode.',
     });
   });
