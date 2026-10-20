@@ -19,7 +19,6 @@
     "dotenv": "^18.0.8",
     "express": "^5.3.0",
     "express-rate-limit": "^8.7.1",
-    "gcc-atlas": "file:..",
     "sqlite": "^5.1.1",
     "sqlite3": "^6.0.1",
     "uuid": "^14.0.3",
