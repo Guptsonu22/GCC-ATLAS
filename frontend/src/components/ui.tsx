@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Loader2, AlertTriangle, Inbox } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export function Panel({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
@@ -91,23 +92,50 @@ export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   );
 }
 
+export interface Crumb {
+  label: string;
+  to?: string;
+}
+
 export function PageHeader({
   eyebrow,
   title,
   description,
   right,
+  crumbs,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
-  description: string;
+  description?: string;
   right?: ReactNode;
+  crumbs?: Crumb[];
 }) {
   return (
     <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-teal-accent">{eyebrow}</p>
+      <div className="min-w-0">
+        {crumbs && crumbs.length > 0 ? (
+          <nav aria-label="Breadcrumb" className="mb-1.5">
+            <ol className="flex flex-wrap items-center gap-1 text-[11px] text-ink-400">
+              {crumbs.map((c, i) => (
+                <li key={`${c.label}-${i}`} className="flex items-center gap-1">
+                  {i > 0 ? <span aria-hidden>/</span> : null}
+                  {c.to ? (
+                    <Link to={c.to} className="hover:text-teal-accent hover:underline">{c.label}</Link>
+                  ) : (
+                    <span className="text-ink-300">{c.label}</span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </nav>
+        ) : null}
+        {eyebrow ? (
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-teal-accent">{eyebrow}</p>
+        ) : null}
         <h1 className="mt-1 text-xl font-semibold tracking-tight text-ink-100">{title}</h1>
-        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-300">{description}</p>
+        {description ? (
+          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-300">{description}</p>
+        ) : null}
       </div>
       {right ? <div className="shrink-0">{right}</div> : null}
     </header>

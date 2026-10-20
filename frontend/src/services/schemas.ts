@@ -90,6 +90,26 @@ export const cityMetricSchema = z.object({
   source_verification_status: z.string().nullable().optional(),
 });
 
+export const policyRecordSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  state: z.string(),
+  policy_type: z.string(),
+  status: z.enum(['draft', 'finalized', 'announced', 'superseded']),
+  description: z.string().nullable().optional(),
+  benefits: z.string().nullable().optional(),
+  normalized_benefits: z.string().nullable().optional(),
+  eligibility_criteria: z.string().nullable().optional(),
+  effective_date: z.string().nullable().optional(),
+  expiry_date: z.string().nullable().optional(),
+  is_active: z.number(),
+  source_title: z.string().nullable().optional(),
+  source_url: z.string().nullable().optional(),
+  source_publisher: z.string().nullable().optional(),
+});
+
+export type PolicyRecord = z.infer<typeof policyRecordSchema>;
+
 export const cityDetailSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -97,27 +117,7 @@ export const cityDetailSchema = z.object({
   tier: z.string().nullable().optional(),
   tracked_company_count: z.number().optional(),
   metrics: z.array(cityMetricSchema).optional(),
-  policies: z
-    .array(
-      z.object({
-        id: z.string(),
-        title: z.string(),
-        state: z.string(),
-        policy_type: z.string(),
-        status: z.enum(['draft', 'finalized', 'announced', 'superseded']),
-        description: z.string().nullable().optional(),
-        benefits: z.string().nullable().optional(),
-        normalized_benefits: z.string().nullable().optional(),
-        eligibility_criteria: z.string().nullable().optional(),
-        effective_date: z.string().nullable().optional(),
-        expiry_date: z.string().nullable().optional(),
-        is_active: z.number(),
-        source_title: z.string().nullable().optional(),
-        source_url: z.string().nullable().optional(),
-        source_publisher: z.string().nullable().optional(),
-      }),
-    )
-    .optional(),
+  policies: z.array(policyRecordSchema).optional(),
 });
 
 export const capabilitySchema = z.object({
