@@ -58,6 +58,15 @@ describe('API integration', () => {
     expect(res.body.data).toHaveLength(3);
   });
 
+  it('city comparison with unknown ids is a 400, never a silently-truncated table', async () => {
+    const res = await request(app).get('/api/cities/compare?ids=loc_bengaluru,loc_NOSUCH');
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('validation_error');
+    expect(res.body.error.details.resolved).toEqual(['loc_bengaluru']);
+    const onlyOne = await request(app).get('/api/cities/compare?ids=loc_NOSUCH1,loc_NOSUCH2');
+    expect(onlyOne.status).toBe(400);
+  });
+
   it('assistant status reports demo mode without key', async () => {
     const res = await request(app).get('/api/assistant/status');
     expect(res.status).toBe(200);
@@ -145,6 +154,20 @@ describe('API integration', () => {
 
     const otherList = await request(app).get('/api/saved-comparisons').set('X-Session-Key', 'comparisons-session-2');
     expect(otherList.body.data.some((x: { id: string }) => x.id === id)).toBe(false);
+
+    // Phase 8 QA: session keys must never leak back in response bodies
+    expect(create.body.session_key).toBeUndefined();
+    expect(list.body.data.every((x: { session_key?: string }) => x.session_key === undefined)).toBe(true);
+    const savedList = await request(app).get('/api/saved-research').set('X-Session-Key', 'integration-session-gold');
+    expect(savedList.body.data.every((x: { session_key?: string }) => x.session_key === undefined)).toBe(true);
+
+    // Phase 8 QA: oversized saved-data payloads are rejected before they hit the DB
+    const huge = await request(app)
+      .post('/api/saved-research')
+      .set('X-Session-Key', 'integration-session-gold')
+      .send({ name: 'Huge blob', type: 'custom_query', data: { blob: 'x'.repeat(25_000) } });
+    expect(huge.status).toBe(400);
+    expect(huge.body.error.code).toBe('validation_error');
 
     const needsTwo = await request(app)
       .post('/api/saved-comparisons')

@@ -87,6 +87,17 @@ function buildCorsOptions(raw) {
 async function startServer() {
     const env = (0, env_1.loadEnv)();
     const app = await createApp();
+    // Fail-loud instead of silently shipping a wide-open API to production.
+    if (env.NODE_ENV === 'production') {
+        const parsed = (0, env_1.parseCorsOrigin)(env.CORS_ORIGIN);
+        if (parsed.open) {
+            console.warn('GCC Atlas production warning: CORS_ORIGIN is not configured — responding to any origin. ' +
+                'Set CORS_ORIGIN (e.g. https://your-frontend-host) before public deployment.');
+        }
+        if (env.DB_PATH === ':memory:') {
+            console.warn('GCC Atlas production warning: DB_PATH is ":memory:" — all writes are lost on restart.');
+        }
+    }
     const server = app.listen(env.PORT, () => {
         const mode = env.AI_API_KEY ? 'llm' : 'demo';
         console.log(`GCC Atlas API listening on http://localhost:${env.PORT} (env: ${env.NODE_ENV}, assistant: ${mode})`);

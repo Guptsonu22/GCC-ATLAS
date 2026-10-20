@@ -7,12 +7,22 @@ import type { SavedComparison, SavedComparisonInput } from '../types';
  * saved_research (see repositories/saved-research.ts for rationale).
  */
 export function createSavedComparisonsRepo(db: Database) {
+  /** Never send the scoping key back in response bodies. */
+  function sanitize(row: Record<string, unknown> | undefined): SavedComparison | undefined {
+    if (!row) return undefined;
+    const { session_key: _k, ...rest } = row;
+    void _k;
+    return rest as unknown as SavedComparison;
+  }
+
   async function listComparisons(sessionKey: string): Promise<SavedComparison[]> {
-    return db.all('SELECT * FROM saved_comparisons WHERE session_key = ? ORDER BY updated_at DESC', [sessionKey]);
+    const rows = (await db.all('SELECT * FROM saved_comparisons WHERE session_key = ? ORDER BY updated_at DESC', [sessionKey])) as unknown as Record<string, unknown>[];
+    return rows.map((r) => sanitize(r) as SavedComparison);
   }
 
   async function getComparison(id: string, sessionKey: string): Promise<SavedComparison | undefined> {
-    return db.get('SELECT * FROM saved_comparisons WHERE id = ? AND session_key = ?', [id, sessionKey]);
+    const row = (await db.get('SELECT * FROM saved_comparisons WHERE id = ? AND session_key = ?', [id, sessionKey])) as Record<string, unknown> | undefined;
+    return sanitize(row);
   }
 
   async function createComparison(sessionKey: string, input: SavedComparisonInput): Promise<SavedComparison | undefined> {

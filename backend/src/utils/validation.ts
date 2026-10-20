@@ -71,7 +71,11 @@ export const assistantSchema = z.object({
 export const savedResearchCreateSchema = z.object({
   name: z.string().trim().min(1).max(200),
   type: z.enum(['city_comparison', 'company_comparison', 'provider_comparison', 'custom_query']),
-  data: z.unknown(),
+  data: z
+    .unknown()
+    // The bag must stay tiny: 20 KB serialized is far beyond any researched
+    // note and prevents multi-hundred-KB blobs bloating the DB and UI.
+    .refine((v) => JSON.stringify(v ?? null).length <= 20_000, 'data payload exceeds the 20 KB limit'),
 });
 
 export const savedResearchUpdateSchema = z.object({

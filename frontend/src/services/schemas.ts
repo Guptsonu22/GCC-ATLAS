@@ -289,7 +289,7 @@ export type SourceWithUsage = z.infer<typeof sourceUsageSchema>;
 
 export const savedResearchSchema = z.object({
   id: z.string(),
-  session_key: z.string(),
+  session_key: z.string().optional(),
   user_id: z.string().nullable().optional(),
   name: z.string(),
   type: z.enum(['city_comparison', 'company_comparison', 'provider_comparison', 'custom_query']),
@@ -300,7 +300,7 @@ export const savedResearchSchema = z.object({
 
 export const savedComparisonSchema = z.object({
   id: z.string(),
-  session_key: z.string(),
+  session_key: z.string().optional(),
   user_id: z.string().nullable().optional(),
   name: z.string(),
   type: z.enum(['city_comparison', 'company_comparison']),

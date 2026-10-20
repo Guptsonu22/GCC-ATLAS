@@ -9,11 +9,22 @@ const database_1 = require("../db/database");
  * another. There is no fixed-user fallback: an absent or invalid key is a 400.
  */
 function createSavedResearchRepo(db) {
+    /** Never send the scoping key (or any user id) back in response bodies. */
+    function sanitize(row) {
+        if (!row)
+            return row;
+        const { session_key: _k, user_id: _u, ...rest } = row;
+        void _k;
+        void _u;
+        return rest;
+    }
     async function listSaved(sessionKey) {
-        return db.all('SELECT * FROM saved_research WHERE session_key = ? ORDER BY updated_at DESC', [sessionKey]);
+        const rows = (await db.all('SELECT * FROM saved_research WHERE session_key = ? ORDER BY updated_at DESC', [sessionKey]));
+        return rows.map((r) => sanitize(r));
     }
     async function getSaved(id, sessionKey) {
-        return db.get('SELECT * FROM saved_research WHERE id = ? AND session_key = ?', [id, sessionKey]);
+        const row = (await db.get('SELECT * FROM saved_research WHERE id = ? AND session_key = ?', [id, sessionKey]));
+        return sanitize(row);
     }
     async function createSaved(input) {
         const id = (0, database_1.newId)('sr');

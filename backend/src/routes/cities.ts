@@ -19,6 +19,16 @@ export function citiesRoutes(db: Database): Router {
     try {
       const { ids } = parseOr400(compareSchema, req.query);
       const result = await repo.compareCities(ids);
+      if (result.length < 2) {
+        // A silently-truncated comparison would look like a working one-column table.
+        return void res.status(400).json({
+          error: {
+            code: 'validation_error',
+            message: 'Not enough valid cities for a comparison — check the city ids',
+            details: { requested_ids: ids, resolved: result.map((c) => ((c as Record<string, unknown>).id as string)) },
+          },
+        });
+      }
       res.json({ data: result, requested_ids: ids });
     } catch (err) {
       next(err);

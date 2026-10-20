@@ -156,14 +156,17 @@ describe('saved research repo', () => {
       data: { ids: ['loc_bengaluru', 'loc_hyderabad'] },
     });
     expect(created!.name).toBe('BLR vs HYD');
-    expect(created!.session_key).toBe('test-session-1');
-    expect(created!.user_id).toBeNull();
+    // Phase 8 security invariant: response payloads NEVER echo the session key.
+    expect(created!.session_key).toBeUndefined();
+    expect(created!.user_id).toBeUndefined();
 
     const renamed = await repo.updateSaved(created!.id, 'test-session-1', { name: 'BLR vs HYD 2026' });
     expect(renamed!.name).toBe('BLR vs HYD 2026');
+    expect(renamed!.session_key).toBeUndefined();
 
     const list = await repo.listSaved('test-session-1');
     expect(list.length).toBe(1);
+    expect(list.every((x) => (x as Record<string, unknown>).session_key === undefined)).toBe(true);
 
     const deleted = await repo.deleteSaved(created!.id, 'test-session-1');
     expect(deleted).toBe(true);

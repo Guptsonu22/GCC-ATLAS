@@ -8,12 +8,23 @@ import { newId } from '../db/database';
  * another. There is no fixed-user fallback: an absent or invalid key is a 400.
  */
 export function createSavedResearchRepo(db: Database) {
+  /** Never send the scoping key (or any user id) back in response bodies. */
+  function sanitize<T extends Record<string, unknown>>(row: T | undefined) {
+    if (!row) return row;
+    const { session_key: _k, user_id: _u, ...rest } = row;
+    void _k;
+    void _u;
+    return rest as T;
+  }
+
   async function listSaved(sessionKey: string) {
-    return db.all('SELECT * FROM saved_research WHERE session_key = ? ORDER BY updated_at DESC', [sessionKey]);
+    const rows = (await db.all('SELECT * FROM saved_research WHERE session_key = ? ORDER BY updated_at DESC', [sessionKey])) as unknown as Record<string, unknown>[];
+    return rows.map((r) => sanitize(r));
   }
 
   async function getSaved(id: string, sessionKey: string) {
-    return db.get('SELECT * FROM saved_research WHERE id = ? AND session_key = ?', [id, sessionKey]);
+    const row = (await db.get('SELECT * FROM saved_research WHERE id = ? AND session_key = ?', [id, sessionKey])) as Record<string, unknown> | undefined;
+    return sanitize(row);
   }
 
   async function createSaved(input: { session_key: string; user_id?: string | null; name: string; type: string; data: unknown }) {

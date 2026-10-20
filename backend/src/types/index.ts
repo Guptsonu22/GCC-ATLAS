@@ -199,7 +199,8 @@ export interface Announcement {
 
 export interface SavedResearch {
   id: string;
-  session_key: string;
+  /** Omitted from API responses (server strips it); present in DB rows. */
+  session_key?: string;
   user_id: string | null;
   name: string;
   type: 'city_comparison' | 'company_comparison' | 'provider_comparison' | 'custom_query';
@@ -210,7 +211,8 @@ export interface SavedResearch {
 
 export interface SavedComparison {
   id: string;
-  session_key: string;
+  /** Omitted from API responses (server strips it); present in DB rows. */
+  session_key?: string;
   user_id: string | null;
   name: string;
   type: 'city_comparison' | 'company_comparison';
