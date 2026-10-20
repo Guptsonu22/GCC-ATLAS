@@ -11,8 +11,10 @@
 
 | Artifact | File Path | Format / Size | Status |
 |---|---|---|---|
-| **Strategy Presentation (PPTX)** | [`submission/GCC-Atlas-Strategy-Deck.pptx`](file:///c:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/submission/GCC-Atlas-Strategy-Deck.pptx) *(also at `product/deck/`)* | Editable PPTX (1.2 MB, 12 slides, 16:9, real UI captures) | **VERIFIED** |
-| **Strategy Presentation (PDF)** | [`submission/GCC-Atlas-Strategy-Deck.pdf`](file:///c:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/submission/GCC-Atlas-Strategy-Deck.pdf) *(also at `product/deck/`)* | PDF (727 KB, 12 pages) | **VERIFIED** |
+| **Final Strategy Presentation (PPTX)** | [`submission/GCC-Atlas-Strategy-Deck-Final.pptx`](file:///c:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/submission/GCC-Atlas-Strategy-Deck-Final.pptx) | Editable PPTX (1.1 MB, 13 slides, 16:9, verified UI captures) | **VERIFIED** |
+| **Final Strategy Presentation (PDF)** | [`submission/GCC-Atlas-Strategy-Deck-Final.pdf`](file:///c:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/submission/GCC-Atlas-Strategy-Deck-Final.pdf) | High-Fidelity PDF (560 KB, 13 pages, vector text) | **VERIFIED** |
+| **Strategy Presentation — Initial (PPTX)** | [`submission/GCC-Atlas-Strategy-Deck.pptx`](file:///c:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/submission/GCC-Atlas-Strategy-Deck.pptx) *(also at `product/deck/`)* | Editable PPTX (1.2 MB, 12 slides, 16:9, initial build) | **PRESERVED** |
+| **Strategy Presentation — Initial (PDF)** | [`submission/GCC-Atlas-Strategy-Deck.pdf`](file:///c:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/submission/GCC-Atlas-Strategy-Deck.pdf) *(also at `product/deck/`)* | PDF (727 KB, 12 pages) | **PRESERVED** |
 | **Final Audit Report** | [`submission/FINAL-AUDIT.md`](file:///c:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/submission/FINAL-AUDIT.md) | Markdown audit with P0–P3 findings and fixes | **VERIFIED** |
 | **Submission Checklist** | [`submission/FINAL-CHECKLIST.md`](file:///c:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/submission/FINAL-CHECKLIST.md) | This document | **VERIFIED** |
 | **Demo Walkthrough Guide** | [`submission/DEMO-WALKTHROUGH.md`](file:///c:/Users/Sonu/OneDrive/Desktop/GCC%20ATLAS/submission/DEMO-WALKTHROUGH.md) | Step-by-step reviewer demo script | **VERIFIED** |
