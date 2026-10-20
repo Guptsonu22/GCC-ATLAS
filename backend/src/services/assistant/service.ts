@@ -43,9 +43,27 @@ export function createAssistantService(db: Database) {
   function composeDemoAnswer(retrieved: Retrieved): AssistantAnswer {
     const a = emptyAnswer();
     const cityNames = retrieved.cities.map((c) => String(c.name));
+    const explicitCityCount = Number(retrieved.matched.explicit_cities ?? 0);
+    const timeWindow = retrieved.time_window_days;
+
+    // Time-window questions lead with the announcements feed.
+    if (timeWindow !== null && retrieved.announcements.length) {
+      a.direct_answer = `${retrieved.announcements.length} tracked announcements in the last ${timeWindow} days.`;
+      a.key_findings = retrieved.announcements.slice(0, 5).map(
+        (x) => `${clean(x.title, 140)} — ${clean(x.company_name ?? x.location_name ?? 'industry')}, ${String(x.announcement_date ?? 'n/a')} (${x.is_verified ? 'verified' : 'unverified'}).`,
+      );
+      a.evidence_facts = retrieved.announcements
+        .filter((x) => x.source_id)
+        .slice(0, 5)
+        .map((x) => ({ statement: clean(x.title, 160), source_ids: [String(x.source_id)] }));
+      a.assumptions = ['Announcements record what was announced — operational reality must be verified via the linked company page.'];
+      a.missing_information = ['Announced (not yet verified) centres carry no established_year by design.'];
+      a.next_step = 'Filter the Explorer by operating_status=announced to track build-out.';
+      return a;
+    }
 
     // comparison intent
-    if (cityNames.length >= 2) {
+    if (explicitCityCount >= 2 && cityNames.length >= 2) {
       a.direct_answer = `Comparing ${cityNames.join(' vs ')} from the GCC Atlas tracked dataset — all figures are indicative estimates with confidence levels.`;
       a.key_findings = [
         `Tracked GCC presence: ${cityNames.map((n) => `${n} ${countCompanies(retrieved, n)}`).join(', ')}.`,
@@ -53,20 +71,20 @@ export function createAssistantService(db: Database) {
       ];
       const metricNames = [...new Set(retrieved.metrics.map((m) => String(m.metric_name)))];
       if (metricNames.length) {
-        a.comparison_table = {
-          caption: `${cityNames.join(' vs ')} — tracked metrics (estimates)`,
-          columns: ['Metric', ...cityNames],
-          rows: metricNames.map((name) => ({
-            label: METRIC_LABELS[name] ?? name,
-            values: cityNames.map((city) => {
-              const m = retrieved.metrics.find((x) => x.metric_name === name && x.city_name === city);
-              if (!m || m.metric_value === null) return null; // missing stays visibly missing
-              const unit = String(m.metric_unit ?? '');
-              const conf = m.confidence_level === 'low' ? ' (low conf.)' : '';
-              return `${m.metric_value}${unit ? ` ${unit}` : ''} (est.)${conf}`;
-            }),
-          })),
-        };
+      a.comparison_table = {
+        caption: `${cityNames.join(' vs ')} — tracked metrics (estimates)`,
+        columns: cityNames,
+        rows: metricNames.map((name) => ({
+          label: METRIC_LABELS[name] ?? name,
+          values: cityNames.map((city) => {
+            const m = retrieved.metrics.find((x) => x.metric_name === name && x.city_name === city);
+            if (!m || m.metric_value === null) return null; // missing stays visibly missing
+            const unit = String(m.metric_unit ?? '');
+            const conf = m.confidence_level === 'low' ? ' (low conf.)' : '';
+            return `${m.metric_value}${unit ? ` ${unit}` : ''} (est.)${conf}`;
+          }),
+        })),
+      };
         a.evidence_facts = metricNames
           .map((name) => {
             const sources = [
@@ -101,6 +119,24 @@ export function createAssistantService(db: Database) {
         a.recommendations = [];
         a.missing_information.push('No single city leads simultaneously on tracked rent AND talent — ranking requires weights from your side.');
       }
+      return a;
+    }
+
+    // single city
+    if (explicitCityCount === 1 && retrieved.cities.length >= 1) {
+      const city = retrieved.cities[0]!;
+      const name = String(city.name);
+      a.direct_answer = `${name}: ${String(city.tracked_company_count)} tracked companies in this dataset; metrics below are indicative estimates.`;
+      const cityMetrics = retrieved.metrics.slice(0, 6);
+      a.key_findings = cityMetrics.map(
+        (m) => `${METRIC_LABELS[String(m.metric_name)] ?? String(m.metric_name)}: ${m.metric_value === null ? 'Not available' : `${m.metric_value} ${String(m.metric_unit ?? '')}`} (${String(m.metric_period ?? 'n/a')})`,
+      );
+      a.evidence_facts = cityMetrics
+        .filter((m) => m.source_id && m.metric_value !== null)
+        .map((m) => ({ statement: `${String(m.city_name)} — ${METRIC_LABELS[String(m.metric_name)] ?? String(m.metric_name)} = ${m.metric_value} ${String(m.metric_unit ?? '')}`, source_ids: [String(m.source_id)] }));
+      a.assumptions = ['City metrics are estimates from public commentary with stated confidence levels.'];
+      a.missing_information = missingForCities(retrieved, [name]);
+      a.next_step = `Compare ${name} against another hub to see relative strengths.`;
       return a;
     }
 
@@ -146,24 +182,6 @@ export function createAssistantService(db: Database) {
       a.assumptions = ['The tracked set is a verified subset of India’s GCC universe (not exhaustive).'];
       a.missing_information = ['Headcounts and centre economics are not tracked for every record — see each company page for what is on file.'];
       a.next_step = 'Open the company record to view its locations and full evidence trail.';
-      return a;
-    }
-
-    // single city
-    if (retrieved.cities.length === 1) {
-      const city = retrieved.cities[0]!;
-      const name = String(city.name);
-      a.direct_answer = `${name}: ${String(city.tracked_company_count)} tracked companies in this dataset; metrics below are indicative estimates.`;
-      const cityMetrics = retrieved.metrics.slice(0, 6);
-      a.key_findings = cityMetrics.map(
-        (m) => `${METRIC_LABELS[String(m.metric_name)] ?? String(m.metric_name)}: ${m.metric_value === null ? 'Not available' : `${m.metric_value} ${String(m.metric_unit ?? '')}`} (${String(m.metric_period ?? 'n/a')})`,
-      );
-      a.evidence_facts = cityMetrics
-        .filter((m) => m.source_id && m.metric_value !== null)
-        .map((m) => ({ statement: `${String(m.city_name)} — ${METRIC_LABELS[String(m.metric_name)] ?? String(m.metric_name)} = ${m.metric_value} ${String(m.metric_unit ?? '')}`, source_ids: [String(m.source_id)] }));
-      a.assumptions = ['City metrics are estimates from public commentary with stated confidence levels.'];
-      a.missing_information = missingForCities(retrieved, [name]);
-      a.next_step = `Compare ${name} against another hub to see relative strengths.`;
       return a;
     }
 

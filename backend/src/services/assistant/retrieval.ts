@@ -54,8 +54,7 @@ export function detectTimeWindowDays(q: string): number | null {
   const lower = q.toLowerCase();
   if (/\blast\s+year\b|\bthis\s+year\b|\b12\s*months\b/.test(lower)) return 365;
   if (/\bquarter\b|\b3\s*months\b/.test(lower)) return 120;
-  const lowered = lower.split(/\W+/);
-  if (lowered.some((w) => RECENT_WORDS.has(w))) return TIME_WINDOW_DAYS;
+  if (/\brecent|latest\b|new/ .test(lower) ) return TIME_WINDOW_DAYS;
   return null;
 }
 
@@ -151,9 +150,31 @@ export function createRetrieval(db: Database) {
 
     const matchedCompanies = [...matchedCompanyCareers.values()].slice(0, RETRIEVAL_CAPS.companies);
 
-    const matchedProviders = allProviders
-      .filter((p) => matches(p.name as string) || matches(p.subcategory as string) || matches(p.description as string) || matches(p.category as string))
-      .slice(0, RETRIEVAL_CAPS.providers);
+    const matchedProviders: Record<string, unknown>[] = [];
+    // Providers match ONLY with an explicit provider intent — generic words in
+    // descriptions ("GCC setup") must not hijack city/company queries.
+    const providerIntent = /provider|vendor|consult|recruit|legal|payroll|real.?estate|\beor\b/i.test(query);
+    if (providerIntent) {
+      const capabilityHitIds = new Set<string>();
+      if (tokens.length) {
+        const capRows = (await db.all(
+          `SELECT DISTINCT provider_id FROM provider_capabilities WHERE ${tokens.slice(0, 6).map(() => 'capability LIKE ?').join(' OR ')}`,
+          tokens.slice(0, 6).map((t) => `%${t}%`),
+        )) as unknown as { provider_id: string }[];
+        for (const row of capRows) capabilityHitIds.add(row.provider_id);
+      }
+      for (const p of allProviders) {
+        if (
+          matches(p.name as string) ||
+          matches(p.subcategory as string) ||
+          matches(p.category as string) ||
+          capabilityHitIds.has(p.id as string)
+        ) {
+          matchedProviders.push(p);
+          if (matchedProviders.length >= RETRIEVAL_CAPS.providers) break;
+        }
+      }
+    }
 
     const matchedPolicies = policies.filter((p) => matches(p.title as string) || matches(p.state as string)).slice(0, RETRIEVAL_CAPS.policies);
 
@@ -210,6 +231,7 @@ export function createRetrieval(db: Database) {
       matched: {
         companies: matchedCompanies.length,
         cities: matchedCities.length,
+        explicit_cities: wantedCities.size,
         providers: matchedProviders.length,
         policies: matchedPolicies.length,
         announcements: matchedAnnouncements.length,
