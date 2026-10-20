@@ -45,7 +45,7 @@ VITE_API_BASE_URL=https://your-backend-host/api npm run build   # → frontend/d
 
 **Backend (Web Service):**
 1. New → Web Service → connect the repo; root dir `backend`.
-2. Build command: `npm ci && npm run build`; Start command: `npm start` (package.json start = `node dist/index.js`).
+2. Build command: `npm ci --include=dev && npm run build`; Start command: `npm start` (package.json start = `node dist/index.js`).
 3. Add **Disk**: mount path `/data`, size ≥ 1 GB; env `DB_PATH=/data/gcc-atlas.db`.
 4. Env vars: as in §2 (`NODE_ENV=production`, `CORS_ORIGIN=https://<frontend-host>.onrender.com`).
 5. Health check path: `/api/health` (returns `{status:'ok', db:'connected'}`; used as the platform's health probe).
@@ -53,7 +53,7 @@ VITE_API_BASE_URL=https://your-backend-host/api npm run build   # → frontend/d
 
 **Frontend (Static Site):**
 1. New → Static Site → connect repo; root dir `frontend`.
-2. Build command: `npm ci && npm run build`; publish dir: `dist`.
+2. Build command: `npm ci --include=dev && npm run build`; publish dir: `dist`.
 3. Env var (secret-file-free, build-time): `VITE_API_BASE_URL=https://<backend-host>.onrender.com/api`.
 4. SPA routing fallback: Render "Static Site" uses rewrite rules — add `/*  -> /index.html  200` so `/explorer`, `/cities`, etc. deep links reload correctly.
 5. After both services exist, set the backend's `CORS_ORIGIN` to the frontend's final URL and redeploy the backend once.
