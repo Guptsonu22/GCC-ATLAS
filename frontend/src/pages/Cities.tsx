@@ -1,237 +1,193 @@
-import { useMemo, useState } from 'react';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Plus, Scale, ExternalLink, Info, TrendingDown, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { Search, X, Plus, Building2, Scale, MapPin } from 'lucide-react';
 import { z } from 'zod';
 import { api } from '../services/client';
-import { cityDetailSchema } from '../services/schemas';
-import type { CityDetail, CityMetric } from '../services/schemas';
-import { Panel, PanelHeader, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
+import { locationSchema, cityDetailSchema, type Location } from '../services/schemas';
+import { Panel, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
+import { METRIC_LABELS, MetricCell, CityPoliciesPanel } from '../components/comparison';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
-const cityDetailResponseSchema = z.object({ data: z.array(cityDetailSchema) });
-const compareSchema = z.object({ data: z.array(cityDetailSchema) });
-
-const METRIC_LABELS: Record<string, string> = {
-  gcc_count_estimated: 'Estimated GCC count',
-  tech_talent_pool_estimated: 'Tech talent pool',
-  office_rent_grade_a: 'Grade-A office rent',
-  metro_rail_km_operational: 'Metro rail network',
-  senior_engineer_total_comp: 'Senior engineer comp (indicative)',
-  entry_engineer_total_comp: 'Entry engineer comp (indicative)',
-};
-
-const MAX_COMPARE = 4;
+const citiesListSchema = z.object({ data: z.array(locationSchema) });
 
 export function CitiesPage() {
   useDocumentTitle('City Intelligence — GCC Atlas');
-  const [selected, setSelected] = useState<string[]>(['loc_bengaluru', 'loc_hyderabad', 'loc_pune']);
+  const [query, setQuery] = useState('');
+  const [openCityId, setOpenCityId] = useState<string | null>(null);
 
   const citiesQuery = useQuery({
     queryKey: ['cities'],
-    queryFn: async () => cityDetailResponseSchema.parse((await api.get('/cities')).data).data as CityDetail[],
+    queryFn: async () => citiesListSchema.parse((await api.get('/cities')).data).data,
   });
-
-  const compareQuery = useQuery({
-    queryKey: ['city-compare', selected.join(',')],
-    queryFn: async () => {
-      const res = await api.get('/cities/compare', { params: { ids: selected.join(',') } });
-      return compareSchema.parse(res.data).data;
-    },
-    placeholderData: keepPreviousData,
-    enabled: selected.length > 0,
-  });
-
-  const metricNames = useMemo(() => {
-    const names: string[] = [];
-    for (const city of compareQuery.data ?? []) {
-      for (const m of city.metrics ?? []) {
-        if (!names.includes(m.metric_name)) names.push(m.metric_name);
-      }
-    }
-    return names;
-  }, [compareQuery.data]);
-
-  const toggleCity = (id: string) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : prev.length >= MAX_COMPARE ? prev : [...prev, id],
-    );
-  };
 
   if (citiesQuery.isLoading) return <Spinner label="Loading city intelligence…" />;
   if (citiesQuery.isError) return <ErrorState message={(citiesQuery.error as Error).message} onRetry={() => citiesQuery.refetch()} />;
 
   const cities = citiesQuery.data!;
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? cities.filter((c) => c.name.toLowerCase().includes(q) || c.state.toLowerCase().includes(q))
+    : cities;
+  const openCity = openCityId ? cities.find((c) => c.id === openCityId) ?? null : null;
 
   return (
     <div className="space-y-5">
       <PageHeader
         eyebrow="City Intelligence"
-        title="Compare India's GCC cities"
-        description="Side-by-side view of talent, indicative compensation, office costs, infrastructure and policy support. All metrics carry definitions, time periods, and confidence flags — 'Not available' is shown rather than guessed."
-        right={<Badge tone="cyan"><Scale className="h-3 w-3" /> {selected.length}/{MAX_COMPARE} selected</Badge>}
+        title="India's GCC cities, tracked and evidenced"
+        description="Each city card shows tracked company counts. Open a city for its full metric sheet (talent, cost, infrastructure — all defined and confidence-flagged) and status-linked policy records, or send it straight to the comparison workspace."
+        crumbs={[{ label: 'Home', to: '/' }, { label: 'City Intelligence' }]}
       />
 
-      {/* City selector */}
       <Panel className="p-4">
-        <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-wider text-ink-400">Select up to {MAX_COMPARE} cities</p>
-        <div className="flex flex-wrap gap-2">
-          {cities.map((city) => {
-            const active = selected.includes(city.id);
-            return (
-              <button
-                key={city.id}
-                onClick={() => toggleCity(city.id)}
-                aria-pressed={active}
-                className={`flex items-center gap-1.5 rounded border px-3 py-1.5 text-xs transition-colors ${
-                  active
-                    ? 'border-teal-accent/50 bg-teal-accent/10 font-medium text-teal-accent'
-                    : 'border-border bg-surface-950 text-ink-300 hover:border-border-strong hover:text-ink-100'
-                }`}
-              >
-                {active ? <Check aria-hidden className="h-3 w-3" /> : <Plus className="h-3 w-3" aria-hidden />}
-                {city.name}
-                <span className="font-mono text-[10px] opacity-70">{city.tracked_company_count ?? 0}</span>
-              </button>
-            );
-          })}
-        </div>
+        <label className="relative flex min-w-56 items-center sm:max-w-md">
+          <Search className="pointer-events-none absolute left-3 h-3.5 w-3.5 text-ink-400" aria-hidden />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Filter cities by name or state…"
+            aria-label="Filter cities"
+            className="w-full rounded border border-border bg-surface-950 py-2 pl-9 pr-8 text-sm text-ink-100 placeholder:text-ink-400 focus:border-teal-accent/50"
+          />
+          {query ? (
+            <button onClick={() => setQuery('')} aria-label="Clear city filter" className="absolute right-2.5 text-ink-400 hover:text-ink-200">
+              <X className="h-3.5 w-3.5" aria-hidden />
+            </button>
+          ) : null}
+        </label>
       </Panel>
 
-      {/* Comparison */}
-      {selected.length === 0 ? (
+      {filtered.length === 0 ? (
         <Panel>
-          <EmptyState title="No cities selected" hint={`Pick between 2 and ${MAX_COMPARE} cities above to compare them side by side.`} />
-        </Panel>
-      ) : compareQuery.isLoading ? (
-        <Spinner label="Building comparison…" />
-      ) : compareQuery.isError ? (
-        <ErrorState message={(compareQuery.error as Error).message} onRetry={() => compareQuery.refetch()} />
-      ) : (
-        <Panel>
-          <PanelHeader
-            title="Comparison"
-            subtitle={`${selected.length} cities × ${metricNames.length} metrics · all numeric figures are indicative estimates unless flagged otherwise`}
+          <EmptyState
+            title="No cities match that filter"
+            hint="Try a partial name like “pradesh” or “kera”. The tracked dataset covers India's active GCC hubs — absence of a city means not-yet-tracked."
           />
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="w-180 px-5 py-2.5 text-left align-bottom text-[10px] font-semibold uppercase tracking-wider text-ink-400">Metric</th>
-                  {(compareQuery.data ?? []).map((city) => (
-                    <th key={city.id} className="px-4 py-2.5 text-left align-bottom">
-                      <p className="text-[13px] font-semibold text-ink-100">{city.name}</p>
-                      <p className="text-[10px] font-normal text-ink-400">{city.state} · {city.tracked_company_count} tracked</p>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {metricNames.map((name) => (
-                  <tr key={name} className="border-b border-border transition-colors last:border-0 hover:bg-surface-850/60">
-                    <td className="px-5 py-2.5 text-xs text-ink-200">{METRIC_LABELS[name] ?? name}</td>
-                    {(compareQuery.data ?? []).map((city) => {
-                      const metric = (city.metrics ?? []).find((m) => m.metric_name === name);
-                      return (
-                        <td key={city.id} className="px-4 py-2.5">
-                          <MetricCell metric={metric} />
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="flex items-start gap-2 border-t border-border px-5 py-3 text-[11px] leading-relaxed text-ink-400">
-            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            Hover or focus a cell to read its definition. Estimates come from public market commentary (Zinnov, NASSCOM, CBRE/JLL research portals, crowd-sourced salary sites) and must be re-verified against current primary reports before use in decisions.
-          </p>
         </Panel>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((city) => (
+            <CityCard key={city.id} city={city} onOpen={() => setOpenCityId(city.id)} />
+          ))}
+        </div>
       )}
 
-      {/* City detail cards with policies */}
-      <div className="grid gap-5 xl:grid-cols-2">
-        {cities
-          .filter((c) => selected.includes(c.id))
-          .map((city) => (
-            <CityPolicyCard key={city.id} city={city} />
-          ))}
-      </div>
+      {openCity ? <CityDetailDrawer city={openCity} onClose={() => setOpenCityId(null)} /> : null}
     </div>
   );
 }
 
-function CityPolicyCard({ city }: { city: CityDetail }) {
-  const detailQuery = useQuery({
-    queryKey: ['city-detail', city.id],
-    queryFn: async () => cityDetailSchema.parse(await api.get(`/cities/${city.id}`).then((r) => r.data)),
-  });
-
-  const policies = detailQuery.data?.policies ?? [];
-
+function CityCard({ city, onOpen }: { city: Location; onOpen: () => void }) {
   return (
-    <Panel>
-      <PanelHeader
-        title={`${city.name}, ${city.state}`}
-        subtitle={`${city.tracked_company_count ?? 0} tracked GCC companies${city.tier ? ` · ${city.tier === 'tier1' ? 'Tier-1 market' : 'Emerging market'}` : ''}`}
-      />
-      {policies.length === 0 ? (
-        <EmptyState title="No policy records on file" hint="We do not list policies we cannot yet verify — check official state portals." />
-      ) : (
-        <ul className="divide-y divide-border">
-          {policies.map((p) => (
-            <li key={p.id} className="px-5 py-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[13px] font-medium text-ink-100">{p.title}</p>
-                  <p className="mt-0.5 text-[11px] text-ink-400">
-                    {p.policy_type} · effective {p.effective_date ?? 'n/a'}{p.expiry_date ? ` · lapsed ${p.expiry_date}` : ''}
-                  </p>
-                </div>
-                <Badge tone={p.is_active ? 'teal' : 'slate'}>{p.is_active ? 'active' : 'lapsed'}</Badge>
-              </div>
-              {p.description ? <p className="mt-1.5 text-xs leading-relaxed text-ink-300">{p.description}</p> : null}
-              {p.source_url ? (
-                <a
-                  href={p.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-teal-accent hover:underline"
-                >
-                  Source: {p.source_title?.slice(0, 48) ?? 'state portal'} <ExternalLink className="h-3 w-3" />
-                </a>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
+    <Panel className="flex flex-col p-4">
+      <div className="flex items-start justify-between gap-2">
+        <h2 className="min-w-0 truncate text-[14px] font-semibold text-ink-100">{city.name}</h2>
+        {city.tier ? <Badge tone={city.tier === 'tier1' ? 'teal' : 'cyan'}>{city.tier === 'tier1' ? 'tier 1' : 'emerging'}</Badge> : null}
+      </div>
+      <p className="mt-0.5 flex items-center gap-1 text-xs text-ink-400">
+        <MapPin className="h-3 w-3" aria-hidden /> {city.state}
+      </p>
+      <p className="mt-3 font-mono text-2xl font-semibold text-ink-100">
+        {city.tracked_company_count ?? 0}
+        <span className="ml-1.5 align-middle text-[10px] font-normal uppercase tracking-wider text-ink-400">tracked GCCs</span>
+      </p>
+      <div className="mt-auto flex gap-2 pt-4">
+        <button
+          onClick={onOpen}
+          className="flex flex-1 items-center justify-center gap-1.5 rounded border border-border bg-surface-800 px-3 py-2 text-xs font-medium text-ink-100 hover:bg-surface-700"
+        >
+          <Building2 className="h-3.5 w-3.5" aria-hidden /> City details
+        </button>
+        <Link
+          to={`/compare?add=${city.id}`}
+          className="flex flex-1 items-center justify-center gap-1.5 rounded border border-teal-accent/30 bg-teal-accent/5 px-3 py-2 text-xs font-medium text-teal-accent hover:bg-teal-accent/10"
+        >
+          <Plus className="h-3.5 w-3.5" aria-hidden /> Add to compare
+        </Link>
+      </div>
     </Panel>
   );
 }
 
-function MetricCell({ metric }: { metric: CityMetric | undefined }) {
-  if (!metric) {
-    return <span className="text-xs text-ink-400" title="No verified metric on file — not available rather than estimated">Not available</span>;
-  }
-  const value = metric.metric_value;
-  const estimate = metric.is_estimate === 1;
-  const low = metric.confidence_level === 'low';
-  const title = [
-    metric.metric_definition ?? '',
-    `Period: ${metric.metric_period ?? 'n/a'}`,
-    metric.source_title ? `Source: ${metric.source_title} (${metric.source_verification_status ?? 'unverified'})` : '',
-  ].filter(Boolean).join('\n');
+/** Drawer with the full metric sheet + policies for one city, fetched from /cities/:id. */
+function CityDetailDrawer({ city, onClose }: { city: Location; onClose: () => void }) {
+  const detail = useQuery({
+    queryKey: ['city-detail', city.id],
+    queryFn: async () => cityDetailSchema.parse((await api.get(`/cities/${city.id}`)).data),
+  });
+
+  const metrics = detail.data?.metrics ?? [];
+  const tracked = detail.data?.tracked_company_count ?? city.tracked_company_count ?? 0;
 
   return (
-    <span className="group inline-flex items-baseline gap-1.5" title={title} tabIndex={0}>
-      <span className={`font-mono text-[13px] ${low ? 'text-ink-300' : 'text-ink-100'}`}>
-        {value === null ? 'Not available' : `${value.toLocaleString('en-IN')} ${metric.metric_unit ?? ''}`}
-      </span>
-      {estimate ? (
-        <Badge tone={low ? 'amber' : 'neutral'} className="translate-y-[-1px]">
-          <TrendingDown className="h-2.5 w-2.5" /> est
-        </Badge>
-      ) : null}
-    </span>
+    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={`City details: ${city.name}`}>
+      <div className="absolute inset-0 bg-black/65" onClick={onClose} aria-hidden />
+      <aside className="absolute inset-y-0 right-0 flex w-full max-w-lg flex-col border-l border-border bg-surface-900 shadow-2xl">
+        <header className="border-b border-border px-5 py-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold text-ink-100">{city.name}</h2>
+              <p className="mt-0.5 text-xs text-ink-400">
+                {city.state} · {tracked ?? 0} tracked companies
+                {city.tier ? ` · ${city.tier === 'tier1' ? 'tier-1 market' : 'emerging market'}` : ''}
+              </p>
+            </div>
+            <button onClick={onClose} aria-label="Close city details" className="rounded border border-border bg-surface-800 p-1.5 text-ink-300 hover:text-ink-100">
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              to={`/compare?add=${city.id}`}
+              className="flex items-center gap-1.5 rounded border border-teal-accent/30 bg-teal-accent/5 px-3 py-1.5 text-xs font-medium text-teal-accent hover:bg-teal-accent/10"
+            >
+              <Scale className="h-3.5 w-3.5" aria-hidden /> Open in compare workspace
+            </Link>
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto">
+          {detail.isLoading ? (
+            <Spinner label="Loading city sheet…" />
+          ) : detail.isError ? (
+            <ErrorState message={(detail.error as Error).message} onRetry={() => detail.refetch()} />
+          ) : (
+            <>
+              <section className="px-5 py-4">
+                <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-400">
+                  Metric sheet ({metrics.length} tracked metrics)
+                </h3>
+                {metrics.length === 0 ? (
+                  <EmptyState title="No metrics on file" hint="This city has no verified metrics yet — the dataset focuses on active GCC hubs." />
+                ) : (
+                  <ul className="divide-y divide-border overflow-hidden rounded border border-border">
+                    {metrics.map((m) => (
+                      <li key={m.id ?? m.metric_name} className="flex items-center justify-between gap-3 bg-surface-850/50 px-3.5 py-2.5">
+                        <span className="text-xs text-ink-200">{METRIC_LABELS[m.metric_name] ?? m.metric_name.replace(/_/g, ' ')}</span>
+                        <MetricCell metric={m} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <p className="mt-2 text-[10px] leading-relaxed text-ink-400">
+                  Hover or focus a value to see its definition, period and source. “Not available” means no verified record on file — never zero.
+                </p>
+              </section>
+
+              <div className="mx-5">
+                <CityPoliciesPanel title="State policies" policies={detail.data?.policies ?? []} />
+              </div>
+
+              <div className="px-5 py-4">
+                <Link to="/compare" className="text-xs text-teal-accent hover:underline">
+                  Build a full comparison →
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+      </aside>
+    </div>
   );
 }

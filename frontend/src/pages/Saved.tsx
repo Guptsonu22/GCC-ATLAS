@@ -1,18 +1,24 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Pencil, Check, X, Bookmark } from 'lucide-react';
+import { Trash2, Bookmark, Scale, ExternalLink } from 'lucide-react';
 import { z } from 'zod';
 import { api } from '../services/client';
-import { savedResearchSchema, cityDetailSchema } from '../services/schemas';
-import type { SavedResearch } from '../services/schemas';
+import {
+  savedResearchSchema,
+  savedComparisonSchema,
+  cityDetailSchema,
+  type SavedResearch,
+  type SavedComparison,
+} from '../services/schemas';
 import { Panel, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
-const listSchema = z.array(savedResearchSchema);
-const savedListSchema = z.object({ data: listSchema });
-const compareSchema = z.object({ data: z.array(cityDetailSchema) });
+const savedResearchListSchema = z.object({ data: z.array(savedResearchSchema) });
+const savedComparisonListSchema = z.object({ data: z.array(savedComparisonSchema) });
+const cityListSlimSchema = z.object({ data: z.array(cityDetailSchema) });
 
-const METRIC_LABELS: Record<string, string> = {
+export const SAVED_METRIC_LABELS: Record<string, string> = {
   gcc_count_estimated: 'Est. GCC count',
   tech_talent_pool_estimated: 'Tech talent pool',
   office_rent_grade_a: 'Grade-A rent',
@@ -21,255 +27,297 @@ const METRIC_LABELS: Record<string, string> = {
   entry_engineer_total_comp: 'Entry comp',
 };
 
+type SavedTab = 'comparisons' | 'research';
+
 export function SavedPage() {
   useDocumentTitle('Saved research — GCC Atlas');
-  const queryClient = useQueryClient();
-  const [name, setName] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState('');
-  const [openItemId, setOpenItemId] = useState<string | null>(null);
-
-
-  const saved = useQuery({
-    queryKey: ['saved-research'],
-    queryFn: async () => savedListSchema.parse((await api.get('/saved-research')).data).data,
-  });
-
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['saved-research'] });
-
-  const createMutation = useMutation({
-    mutationFn: async () =>
-      api.post('/saved-research', {
-        name: name.trim() || `City comparison ${new Date().toISOString().slice(0, 10)}`,
-        type: 'city_comparison',
-        data: { ids: ['loc_bengaluru', 'loc_hyderabad'], note: 'Default starter comparison — edit via API or rename.' },
-      }),
-    onSuccess: () => {
-      setName('');
-      invalidate();
-    },
-  });
-
-  const renameMutation = useMutation({
-    mutationFn: async ({ id, name }: { id: string; name: string }) => api.patch(`/saved-research/${id}`, { name }),
-    onSuccess: () => {
-      setEditingId(null);
-      invalidate();
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => api.delete(`/saved-research/${id}`),
-    onSuccess: invalidate,
-  });
-
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Saved Research"
-        title="Your comparisons and research items"
-        description="Create, rename, revisit and delete saved city comparisons. Items are persisted server-side in the GCC Atlas database (prototype uses a single shared user space)."
+        eyebrow="Saved"
+        title="Your saved comparisons and research"
+        description="Stored server-side under an anonymous session key held by this browser — nothing is shared across devices by design, and no account is required. Savings start from the Compare Workspace."
+        crumbs={[{ label: 'Home', to: '/' }, { label: 'Saved' }]}
       />
-
-      <Panel className="p-4">
-        <form
-          onSubmit={(e) => { e.preventDefault(); createMutation.mutate(); }}
-          className="flex items-center gap-2.5"
-        >
-          <div className="flex-1">
-            <label htmlFor="saved-name" className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-ink-400">
-              New saved comparison name
-            </label>
-            <input
-              id="saved-name"
-
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. BLR vs HYD vs PUNE — Q4 review"
-              className="w-full rounded border border-border bg-surface-950 px-3 py-2 text-sm text-ink-100 placeholder:text-ink-400 focus:border-teal-accent/50"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={createMutation.isPending}
-            className="flex items-center gap-1.5 rounded bg-teal-accent px-4 py-2.5 text-sm font-semibold text-surface-950 transition-opacity hover:opacity-90 disabled:opacity-40"
-          >
-            <Plus className="h-3.5 w-3.5" /> Save item
-          </button>
-        </form>
-        <p className="mt-2 text-[11px] text-ink-400">
-          The prototype creates a starter Bengaluru–Hyderabad comparison which you can rename or delete; the full builder (custom city picklists on save) is on the roadmap.
-        </p>
-        {createMutation.isError ? <p className="mt-1.5 text-[11px] text-rose-flag">{(createMutation.error as Error).message}</p> : null}
-      </Panel>
-
-      {saved.isLoading ? (
-        <Spinner label="Loading saved items…" />
-      ) : saved.isError ? (
-        <ErrorState message={(saved.error as Error).message} onRetry={() => saved.refetch()} />
-      ) : saved.data!.length === 0 ? (
-        <Panel>
-          <EmptyState
-            title="Nothing saved yet"
-            hint="Create a comparison above, or save one from the City Intelligence page later in the roadmap."
-          />
-        </Panel>
-      ) : (
-        <div className="space-y-3">
-          {saved.data!.map((item) => (
-            <SavedItem
-              key={item.id}
-              item={item}
-              open={openItemId === item.id}
-              onToggle={() => setOpenItemId((cur) => (cur === item.id ? null : item.id))}
-              editing={editingId === item.id}
-              onEditStart={() => { setEditingId(item.id); setEditName(item.name); }}
-              onEditCancel={() => setEditingId(null)}
-              onEditSave={() => renameMutation.mutate({ id: item.id, name: editName })}
-              editName={editName}
-              setEditName={setEditName}
-              onDelete={() => deleteMutation.mutate(item.id)}
-              busy={renameMutation.isPending || deleteMutation.isPending}
-            />
-          ))}
-        </div>
-      )}
+      <SavedTabs />
     </div>
   );
 }
 
-function SavedItem({
-  item, open, onToggle, editing, onEditStart, onEditCancel, onEditSave, editName, setEditName, onDelete, busy,
+function SavedTabs() {
+  const [tab, setTab] = useState<SavedTab>('comparisons');
+
+  return (
+    <>
+      <div className="flex gap-1.5" role="tablist" aria-label="Saved item type">
+        <button
+          role="tab"
+          aria-selected={tab === 'comparisons'}
+          onClick={() => setTab('comparisons')}
+          className={`flex items-center gap-1.5 rounded border px-3.5 py-2 text-xs transition-colors ${
+            tab === 'comparisons'
+              ? 'border-teal-accent/50 bg-teal-accent/10 font-medium text-teal-accent'
+              : 'border-border bg-surface-950 text-ink-300 hover:text-ink-100'
+          }`}
+        >
+          <Scale className="h-3.5 w-3.5" aria-hidden /> City comparisons
+        </button>
+        <button
+          role="tab"
+          aria-selected={tab === 'research'}
+          onClick={() => setTab('research')}
+          className={`flex items-center gap-1.5 rounded border px-3.5 py-2 text-xs transition-colors ${
+            tab === 'research'
+              ? 'border-teal-accent/50 bg-teal-accent/10 font-medium text-teal-accent'
+              : 'border-border bg-surface-950 text-ink-300 hover:text-ink-100'
+          }`}
+        >
+          <Bookmark className="h-3.5 w-3.5" aria-hidden /> Research notes
+        </button>
+      </div>
+      {tab === 'comparisons' ? <SavedComparisons /> : <SavedResearchList />}
+    </>
+  );
+}
+
+/** Id → city-name map from the shared cities query (cached across pages). */
+function useCityNameMap() {
+  const citiesQuery = useQuery({
+    queryKey: ['cities-for-compare'],
+    queryFn: async () => cityListSlimSchema.parse((await api.get('/cities')).data).data,
+    staleTime: 120_000,
+  });
+  const map = new Map<string, string>();
+  for (const c of citiesQuery.data ?? []) map.set(c.id, c.name);
+  return { map, ready: !citiesQuery.isError };
+}
+
+/* ---------------- city comparisons ---------------- */
+
+function SavedComparisons() {
+  const queryClient = useQueryClient();
+  const [openId, setOpenId] = useState<string | null>(null);
+
+  const saved = useQuery({
+    queryKey: ['saved-comparisons-list'],
+    queryFn: async () => savedComparisonListSchema.parse((await api.get('/saved-comparisons')).data).data,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => api.delete(`/saved-comparisons/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['saved-comparisons-list'] }),
+  });
+
+  if (saved.isLoading) return <Spinner label="Loading saved comparisons…" />;
+  if (saved.isError) return <ErrorState message={(saved.error as Error).message} onRetry={() => saved.refetch()} />;
+
+  if (saved.data!.length === 0) {
+    return (
+      <Panel>
+        <EmptyState
+          title="No saved comparisons yet"
+          hint="Open the Compare Workspace, pick 2–4 cities, and press “Save to my session”. Saved comparisons stay available after navigation and refresh."
+        />
+        <div className="border-t border-border">
+          <Link to="/compare" className="block px-5 py-3 text-xs font-medium text-teal-accent hover:bg-surface-850">
+            Open the Compare Workspace →
+          </Link>
+        </div>
+      </Panel>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {saved.data!.map((item) => (
+        <SavedComparisonCard
+          key={item.id}
+          item={item}
+          open={openId === item.id}
+          onToggle={() => setOpenId(openId === item.id ? null : item.id)}
+          onDelete={() => deleteMutation.mutate(item.id)}
+          busy={deleteMutation.isPending}
+        />
+      ))}
+    </div>
+  );
+}
+
+function SavedComparisonCard({
+  item,
+  open,
+  onToggle,
+  onDelete,
+  busy,
 }: {
-  item: SavedResearch;
+  item: SavedComparison;
   open: boolean;
   onToggle: () => void;
-  editing: boolean;
-  onEditStart: () => void;
-  onEditCancel: () => void;
-  onEditSave: () => void;
-  editName: string;
-  setEditName: (v: string) => void;
   onDelete: () => void;
   busy: boolean;
 }) {
+  const { map: nameMap, ready } = useCityNameMap();
+  const ids = useMemoSavedIds(item.location_ids);
+  const names = ids.map((id) => nameMap.get(id) ?? id.replace('loc_', ''));
+
   return (
     <Panel>
-      <div className="flex items-center gap-3 px-5 py-3">
-        <Bookmark className={`h-4 w-4 shrink-0 ${open ? 'text-teal-accent' : 'text-ink-400'}`} />
-        {editing ? (
-          <div className="flex flex-1 items-center gap-2">
-            <input
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              aria-label="Rename saved item"
-              className="w-full rounded border border-teal-accent/40 bg-surface-950 px-2.5 py-1.5 text-sm text-ink-100"
-              onKeyDown={(e) => { if (e.key === 'Enter') onEditSave(); if (e.key === 'Escape') onEditCancel(); }}
-              autoFocus
-            />
-            <button onClick={onEditSave} disabled={busy || editName.trim().length === 0} aria-label="Save rename" className="rounded border border-teal-accent/40 bg-teal-accent/10 p-1.5 text-teal-accent hover:bg-teal-accent/20 disabled:opacity-40">
-              <Check className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={onEditCancel} aria-label="Cancel rename" className="rounded border border-border p-1.5 text-ink-300 hover:text-ink-100">
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        ) : (
-          <button onClick={onToggle} className="min-w-0 flex-1 text-left" aria-expanded={open}>
-            <span className="block truncate text-[14px] font-semibold text-ink-100">{item.name}</span>
-            <span className="text-[11px] text-ink-400">
-              {item.type.replace(/_/g, ' ')} · created {item.created_at.slice(0, 10)}
-            </span>
+      <div className="flex flex-wrap items-center gap-3 px-5 py-3">
+        <Scale className={`h-4 w-4 shrink-0 ${open ? 'text-teal-accent' : 'text-ink-400'}`} aria-hidden />
+        <button onClick={onToggle} className="min-w-0 flex-1 text-left" aria-expanded={open}>
+          <span className="block truncate text-[14px] font-semibold text-ink-100">{item.name}</span>
+          <span className="text-[11px] text-ink-400">
+            {ids.length} cities{ready && names.length ? ` · ${names.join(', ')}` : ''} · saved {item.created_at.slice(0, 10)}
+          </span>
+        </button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Link
+            to={`/compare?ids=${ids.join(',')}`}
+            className="flex items-center gap-1 rounded border border-border bg-surface-800 px-2.5 py-1.5 text-[11px] text-ink-200 hover:border-teal-accent/40 hover:text-teal-accent"
+          >
+            <ExternalLink className="h-3 w-3" aria-hidden /> Open in workspace
+          </Link>
+          <button
+            onClick={onDelete}
+            disabled={busy}
+            aria-label={`Delete ${item.name}`}
+            className="rounded border border-rose-flag/30 p-1.5 text-rose-flag hover:bg-rose-flag/10 disabled:opacity-40"
+          >
+            <Trash2 className="h-3.5 w-3.5" aria-hidden />
           </button>
-        )}
-        {!editing ? (
-          <div className="flex shrink-0 items-center gap-1.5">
-            <button onClick={onEditStart} aria-label={`Rename ${item.name}`} className="rounded border border-border p-1.5 text-ink-300 hover:text-ink-100 hover:border-border-strong">
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={onDelete} disabled={busy} aria-label={`Delete ${item.name}`} className="rounded border border-rose-flag/30 p-1.5 text-rose-flag hover:bg-rose-flag/10 disabled:opacity-40">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        ) : null}
+        </div>
       </div>
-      {open ? <SavedItemDetail item={item} /> : null}
-      <SavedItemFooter itemId={item.id} open={open} />
+      {open ? <SavedComparisonDetail ids={ids} /> : null}
     </Panel>
   );
 }
 
-function SavedItemDetail({ item }: { item: SavedResearch }) {
+function useMemoSavedIds(json: string): string[] {
+  try {
+    const parsed = JSON.parse(json) as unknown;
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function SavedComparisonDetail({ ids }: { ids: string[] }) {
   const detail = useQuery({
-    queryKey: ['saved-item-data', item.id, item.data],
-    queryFn: async () => {
-      const parsed = JSON.parse(item.data) as { ids?: string[] };
-      const ids = parsed.ids ?? [];
-      if (ids.length === 0) return null;
-      return compareSchema.parse((await api.get('/cities/compare', { params: { ids: ids.join(',') } })).data).data;
-    },
-    enabled: item.type === 'city_comparison',
+    queryKey: ['saved-comparison-data', ids.join(',')],
+    queryFn: async () =>
+      z.object({ data: z.array(cityDetailSchema) }).parse(
+        (await api.get('/cities/compare', { params: { ids: ids.join(',') } })).data,
+      ).data,
+    enabled: ids.length > 1,
   });
 
-  if (item.type !== 'city_comparison') {
-    return <p className="text-xs text-ink-400">Details for this item type are not visualized yet.</p>;
+  if (ids.length < 2) {
+    return (
+      <div className="border-t border-border px-5 py-4 text-xs text-amber-flag">
+        This saved comparison has fewer than 2 cities in its payload and cannot render as a matrix. Delete it and re-save from the workspace.
+      </div>
+    );
+  }
+  if (detail.isLoading) return <div className="border-t border-border"><Spinner label="Loading comparison…" /></div>;
+  if (detail.isError) {
+    return <div className="border-t border-border"><ErrorState message={(detail.error as Error).message} onRetry={() => detail.refetch()} /></div>;
   }
 
+  const cities = detail.data ?? [];
   return (
     <div className="border-t border-border px-5 py-4">
-      {detail.isLoading ? <Spinner label="Loading comparison…" /> : null}
-      {detail.isError ? <ErrorState message={(detail.error as Error).message} /> : null}
-      {detail.data && detail.data.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[480px] border-collapse text-[12px]">
-            <thead>
-              <tr className="border-b border-border-strong">
-                <th className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-400">Metric</th>
-                {detail.data.map((city) => (
-                  <th key={city.id} className="px-2.5 py-2 text-left text-[12px] font-semibold text-ink-100">{city.name}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {['gcc_count_estimated', 'tech_talent_pool_estimated', 'office_rent_grade_a', 'metro_rail_km_operational', 'senior_engineer_total_comp'].map((metricName) => (
-                <tr key={metricName} className="border-b border-border last:border-0">
-                  <td className="px-2.5 py-2 text-ink-200">{METRIC_LABELS[metricName] ?? metricName}</td>
-                  {detail.data!.map((city) => {
-                    const m = (city.metrics ?? []).find((x) => x.metric_name === metricName);
-                    return (
-                      <td key={city.id} className="px-2.5 py-2 font-mono text-ink-100">
-                        {m && m.metric_value !== null ? `${m.metric_value.toLocaleString('en-IN')}` : 'Not available'}
-                        {m && m.is_estimate === 1 ? <Badge tone="amber" className="ml-1">est</Badge> : null}
-                      </td>
-                    );
-                  })}
-                </tr>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[520px] border-collapse text-[12px]">
+          <caption className="sr-only">Saved comparison metrics across selected cities</caption>
+          <thead>
+            <tr className="border-b border-border-strong">
+              <th scope="col" className="px-2.5 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-400">Metric</th>
+              {cities.map((city) => (
+                <th key={city.id} scope="col" className="px-2.5 py-2 text-left text-[12px] font-semibold text-ink-100">{city.name}</th>
               ))}
-            </tbody>
-          </table>
-        </div>
-      ) : !detail.isLoading && !detail.isError ? (
-        <p className="text-xs text-ink-400">No comparison data stored for this item.</p>
-      ) : null}
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(SAVED_METRIC_LABELS).map(([metricName, label]) => (
+              <tr key={metricName} className="border-b border-border last:border-0">
+                <td className="px-2.5 py-2 text-ink-300">{label}</td>
+                {cities.map((city) => {
+                  const m = (city.metrics ?? []).find((x) => x.metric_name === metricName);
+                  return (
+                    <td key={city.id} className="px-2.5 py-2 font-mono text-ink-100">
+                      {m && m.metric_value !== null ? m.metric_value.toLocaleString('en-IN') : 'Not available'}
+                      {m && m.is_estimate === 1 ? <Badge tone="amber" className="ml-1">est</Badge> : null}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 text-[10px] text-ink-400">
+        Saved at creation time — {ids.length} city references; figures re-fetched live from the dataset.
+      </p>
     </div>
   );
 }
 
-function SavedItemFooter({ itemId, open }: { itemId: string; open: boolean }) {
-  const data = useQuery({
-    queryKey: ['saved-item-raw', itemId],
-    queryFn: async () => JSON.parse(
-      (await api.get('/saved-research')).data.data.find((x: SavedResearch) => x.id === itemId)?.data ?? '{}',
-    ) as { ids?: string[]; note?: string },
-    enabled: open,
+/* ---------------- research notes ---------------- */
+
+function SavedResearchList() {
+  const queryClient = useQueryClient();
+  const research = useQuery({
+    queryKey: ['saved-research'],
+    queryFn: async () => savedResearchListSchema.parse((await api.get('/saved-research')).data).data,
   });
-  if (!open) return null;
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => api.delete(`/saved-research/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['saved-research'] }),
+  });
+
   return (
-    <div className="border-t border-border px-5 py-2.5">
-      <p className="text-[10px] text-ink-400">
-        Stored payload: {data.data?.ids ? `${data.data.ids.length} cities (${data.data.ids.map((i) => i.replace('loc_', '')).join(', ')})` : 'custom'}
-        {data.data?.note ? ` — ${data.data.note}` : ''}
-      </p>
+    <div className="space-y-3">
+      <Panel className="p-4">
+        <p className="text-xs leading-relaxed text-ink-300">
+          Research notes are written by API workflows (for example scripted research tasks) via{' '}
+          <code className="rounded bg-surface-800 px-1 py-0.5 font-mono text-[10px] text-ink-300">POST /api/saved-research</code> with the session
+          key. City comparisons belong on the first tab.
+        </p>
+      </Panel>
+      {research.isLoading ? (
+        <Spinner label="Loading research items…" />
+      ) : research.isError ? (
+        <ErrorState message={(research.error as Error).message} onRetry={() => research.refetch()} />
+      ) : research.data!.length === 0 ? (
+        <Panel>
+          <EmptyState
+            title="No research items yet"
+            hint="Items created through the saved-research API will appear here, scoped to this browser session."
+          />
+        </Panel>
+      ) : (
+        (research.data ?? []).map((item) => (
+          <Panel key={item.id}>
+            <div className="flex items-center justify-between gap-3 px-5 py-3">
+              <div className="min-w-0">
+                <p className="truncate text-[13px] font-semibold text-ink-100">{item.name}</p>
+                <p className="text-[11px] text-ink-400">
+                  {item.type.replace(/_/g, ' ')} · created {item.created_at.slice(0, 10)}
+                </p>
+              </div>
+              <button
+                onClick={() => deleteMutation.mutate(item.id)}
+                disabled={deleteMutation.isPending}
+                className="rounded border border-rose-flag/30 p-1.5 text-rose-flag hover:bg-rose-flag/10 disabled:opacity-40"
+                aria-label={`Delete ${item.name}`}
+              >
+                <Trash2 className="h-3.5 w-3.5" aria-hidden />
+              </button>
+            </div>
+          </Panel>
+        ))
+      )}
     </div>
   );
 }

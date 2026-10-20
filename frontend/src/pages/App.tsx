@@ -1,9 +1,12 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Shell } from '../components/Shell';
+import { AppShellProvider } from '../context/AppShellContext';
 import { DashboardPage } from './Dashboard';
 import { ExplorerPage } from './Explorer';
+import { CompanyDetailPage } from './CompanyDetail';
 import { CitiesPage } from './Cities';
+import { CompareWorkspacePage } from './CompareWorkspace';
 import { ProvidersPage } from './Providers';
 import { AssistantPage } from './Assistant';
 import { SourcesPage } from './Sources';
@@ -31,8 +34,16 @@ const router = createBrowserRouter([
     element: <Shell><ExplorerPage /></Shell>,
   },
   {
+    path: '/companies/:companyId',
+    element: <Shell><CompanyDetailPage /></Shell>,
+  },
+  {
     path: '/cities',
     element: <Shell><CitiesPage /></Shell>,
+  },
+  {
+    path: '/compare',
+    element: <Shell><CompareWorkspacePage /></Shell>,
   },
   {
     path: '/providers',
@@ -60,7 +71,9 @@ export function App() {
   useDocumentTitle('GCC Atlas — India\u2019s GCC ecosystem, made searchable');
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <AppShellProvider>
+        <RouterProvider router={router} />
+      </AppShellProvider>
     </QueryClientProvider>
   );
 }
