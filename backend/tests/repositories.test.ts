@@ -95,6 +95,8 @@ describe('cities repo', () => {
     for (const city of result) {
       expect((city as Record<string, unknown>).metrics).toBeTruthy();
     }
+    const bengaluru = result.find((c) => (c as Record<string, unknown>).id === 'loc_bengaluru') as Record<string, unknown>;
+    expect(bengaluru.tracked_company_count).toBe(38);
   });
 
   it('marks metrics as estimates with confidence levels', async () => {
