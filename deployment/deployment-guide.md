@@ -22,7 +22,7 @@ Browser → Static frontend (Vite build: /explorer /cities /compare /providers /
 |---|---|---|
 | `NODE_ENV` | `production` | enables production warnings + request logging; keeps rate limiting on |
 | `PORT` | provider-assigned / `4000` | backend listens on this |
-| `DB_PATH` | `/data/gcc-atlas.db` (Render disk mount) or persistent volume path | MUST be a mounted persistent disk, not the ephemeral container FS |
+| `DB_PATH` | `data/gcc-atlas.db` (free tier) or `/data/gcc-atlas.db` (if persistent disk attached) | Automatically falls back to project local path if /data is not mounted |
 | `CORS_ORIGIN` | `https://<your-frontend-host>` | exact allowlist, comma-separated for multiple; omitting it returns wide-open `*` CORS with a **boot warning** |
 | `AI_API_KEY` | optional provider secret | set via provider's secret manager (never committed); empty = deterministic demo assistant |
 | `AI_BASE_URL` / `AI_MODEL` / `AI_TIMEOUT_MS` / `AI_MAX_TOKENS` | as available (optional) | LLM tuning; safe defaults documented in `backend/.env.example` |
@@ -46,8 +46,8 @@ VITE_API_BASE_URL=https://your-backend-host/api npm run build   # → frontend/d
 **Backend (Web Service):**
 1. New → Web Service → connect the repo; root dir `backend`.
 2. Build command: `npm ci --include=dev && npm run build`; Start command: `npm start` (package.json start = `node dist/index.js`).
-3. Add **Disk**: mount path `/data`, size ≥ 1 GB; env `DB_PATH=/data/gcc-atlas.db`.
-4. Env vars: as in §2 (`NODE_ENV=production`, `NODE_VERSION=20.18.0`, `CORS_ORIGIN=https://<frontend-host>.onrender.com`).
+3. Env vars: as in §2 (`NODE_ENV=production`, `NODE_VERSION=20.18.0`, `DB_PATH=data/gcc-atlas.db`, `CORS_ORIGIN=https://<frontend-host>.onrender.com`).
+   *(Optional on paid tier):* If using Render's persistent disk, mount at `/data` with `DB_PATH=/data/gcc-atlas.db`. On free tier, leave as `data/gcc-atlas.db` (auto-fallback handles unwritable paths safely).
    *Native Addons (GLIBC compatibility):* Node 20 LTS is pinned via `.node-version`. The backend build script automatically detects Linux environments and rebuilds `sqlite3` from source via `scripts/rebuild-sqlite-linux.js` using Render's native Debian 12 compiler toolchain, completely eliminating `GLIBC_2.38 not found` errors.
 5. Health check path: `/api/health` (returns `{status:'ok', db:'connected'}`; used as the platform's health probe).
 6. Logs: Render dashboard → service → Logs tab (the app also logs one structured line per request: `[gcc-atlas-api] GET /api/... 200 12ms`).

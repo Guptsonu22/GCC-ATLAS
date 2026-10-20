@@ -14,15 +14,11 @@ services:
       - key: NODE_ENV
         value: production
       - key: DB_PATH
-        value: /data/gcc-atlas.db
+        value: data/gcc-atlas.db
       - key: CORS_ORIGIN
         sync: false # set to your deployed frontend URL in the dashboard
       - key: AI_API_KEY
         sync: false # optional; empty = deterministic demo assistant
-    disk:
-      name: gcc-atlas-db
-      mountPath: /data
-      sizeGB: 1
 
   # Frontend — Vite static site
   - type: web

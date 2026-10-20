@@ -18,12 +18,37 @@ let db = null;
  * the `sqlite3` driver behind the promise-based `sqlite` wrapper instead.
  * The repository layer keeps SQL isolated so migration to PostgreSQL is possible.
  */
+function resolveWritableDbPath(requestedPath) {
+    const preferred = requestedPath || (0, path_1.resolve)(process.cwd(), 'data', 'gcc-atlas.db');
+    if (preferred === ':memory:')
+        return preferred;
+    const candidates = [
+        preferred,
+        (0, path_1.resolve)(process.cwd(), 'data', 'gcc-atlas.db'),
+        (0, path_1.resolve)('/tmp', 'gcc-atlas.db'),
+    ];
+    for (const candidate of candidates) {
+        const dir = (0, path_1.resolve)(candidate, '..');
+        try {
+            (0, fs_1.mkdirSync)(dir, { recursive: true });
+            return candidate;
+        }
+        catch (err) {
+            const code = err?.code;
+            if (code === 'EACCES' || code === 'EPERM' || code === 'EROFS') {
+                console.warn(`[gcc-atlas-api] Notice: Cannot write to "${dir}" (${code}). Trying fallback candidate...`);
+                continue;
+            }
+            throw err;
+        }
+    }
+    console.warn('[gcc-atlas-api] Warning: All filesystem paths unwritable; falling back to in-memory database.');
+    return ':memory:';
+}
 async function getDatabase() {
     if (!db) {
-        const dbPath = process.env.DB_PATH || (0, path_1.resolve)(process.cwd(), 'data', 'gcc-atlas.db');
-        if (dbPath !== ':memory:') {
-            (0, fs_1.mkdirSync)((0, path_1.resolve)(dbPath, '..'), { recursive: true });
-        }
+        const dbPath = resolveWritableDbPath(process.env.DB_PATH);
+        console.log(`[gcc-atlas-api] Connecting to database at: ${dbPath}`);
         db = await (0, sqlite_1.open)({ filename: dbPath, driver: sqlite3_1.default.Database });
         await db.exec('PRAGMA foreign_keys = ON;');
         await initializeSchema(db);
