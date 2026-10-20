@@ -13,7 +13,7 @@ import {
   locationSchema,
   policyRecordSchema,
   providerSchema,
-  sourceRecordSchema,
+  sourceSchema,
   savedComparisonSchema,
 } from '../src/services/schemas';
 
@@ -102,7 +102,7 @@ describe('live backend smoke (real API, frontend schemas)', () => {
 
   it('GET /source-records is the canonical endpoint with confidence levels', async () => {
     const { data } = await axios.get(`${BASE}/source-records`);
-    const sources = z.object({ data: z.array(sourceRecordSchema) }).parse(data).data;
+    const sources = z.object({ data: z.array(sourceSchema) }).parse(data).data;
     expect(sources.length).toBeGreaterThan(0);
     for (const s of sources) expect(['high', 'medium', 'low']).toContain(s.confidence_level);
     // Legacy path must be gone.
@@ -111,7 +111,7 @@ describe('live backend smoke (real API, frontend schemas)', () => {
 
   it('GET /companies/:id detail parses with company envelope', async () => {
     const { data } = await axios.get(`${BASE}/companies`);
-    const companies = z.array(z.object({ id: z.string() })).parse(data);
+    const companies = z.object({ data: z.array(z.object({ id: z.string() })) }).parse(data).data;
     expect(companies.length).toBeGreaterThan(0);
     const first = companies[0]!.id;
     const detailRes = await axios.get(`${BASE}/companies/${first}`);
