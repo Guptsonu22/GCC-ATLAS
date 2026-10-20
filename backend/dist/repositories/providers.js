@@ -19,6 +19,10 @@ function createProvidersRepo(db) {
             where.push('(p.operating_locations LIKE ? OR p.headquarters_location_id = ?)');
             params.push(`%"${filters.location_id}"%`, filters.location_id);
         }
+        if (filters.capability) {
+            where.push('EXISTS (SELECT 1 FROM provider_capabilities pc WHERE pc.provider_id = p.id AND pc.capability LIKE ?)');
+            params.push(`%${filters.capability}%`);
+        }
         if (typeof filters.is_verified === 'boolean') {
             where.push('p.is_verified = ?');
             params.push(filters.is_verified ? 1 : 0);

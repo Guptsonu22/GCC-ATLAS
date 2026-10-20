@@ -220,6 +220,18 @@ CREATE TABLE IF NOT EXISTS saved_comparisons (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- ---------------------------------------------------------------- events
+-- Append-only usage instrumentation (PRD §3.5). No user-identifying data is
+-- stored: the session key POSTed with events is hashed to a pseudonymous id
+-- for repeat-visit counting and never stored raw.
+CREATE TABLE IF NOT EXISTS events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,              -- catalog: search, detail_view, compare_create, compare_reopen, source_click, export, saved_create
+  session_hash TEXT,               -- sha256 hash of session key, truncated (pseudonymous, non-reversible)
+  properties TEXT,                 -- small JSON bag (category of object engaged with; page path)
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- ---------------------------------------------------------------- indexes
 CREATE INDEX IF NOT EXISTS idx_companies_sector ON companies(sector_id);
 CREATE INDEX IF NOT EXISTS idx_companies_status ON companies(operating_status);
@@ -240,3 +252,5 @@ CREATE INDEX IF NOT EXISTS idx_provider_capabilities_provider ON provider_capabi
 CREATE INDEX IF NOT EXISTS idx_provider_sources_provider ON provider_sources(provider_id);
 CREATE INDEX IF NOT EXISTS idx_saved_research_session ON saved_research(session_key);
 CREATE INDEX IF NOT EXISTS idx_saved_comparisons_session ON saved_comparisons(session_key);
+CREATE INDEX IF NOT EXISTS idx_events_name ON events(name);
+CREATE INDEX IF NOT EXISTS idx_events_created ON events(created_at);

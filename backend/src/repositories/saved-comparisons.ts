@@ -37,7 +37,15 @@ export function createSavedComparisonsRepo(db: Database) {
     return (result.changes ?? 0) > 0;
   }
 
-  return { listComparisons, getComparison, createComparison, deleteComparison };
+  async function renameComparison(id: string, sessionKey: string, name: string): Promise<boolean> {
+    const result = await db.run(
+      "UPDATE saved_comparisons SET name = ?, updated_at = datetime('now') WHERE id = ? AND session_key = ?",
+      [name, id, sessionKey],
+    );
+    return (result.changes ?? 0) > 0;
+  }
+
+  return { listComparisons, getComparison, createComparison, deleteComparison, renameComparison };
 }
 
 export type SavedComparisonsRepo = ReturnType<typeof createSavedComparisonsRepo>;

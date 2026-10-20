@@ -253,6 +253,7 @@ export interface CompanyFilters {
 export interface ProviderFilters {
   category?: Provider['category'];
   location_id?: string;
+  capability?: string;
   query?: string;
   is_verified?: boolean;
   page?: number;

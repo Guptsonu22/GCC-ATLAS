@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { z } from 'zod';
 import { Search, X, ChevronLeft, ChevronRight, MapPin, CheckCircle2, ExternalLink, ShieldCheck, ClipboardList, RotateCcw } from 'lucide-react';
 
 import { api } from '../services/client';
-import { providersResponseSchema, type Provider } from '../services/schemas';
+import { providersResponseSchema, locationSchema, type Provider } from '../services/schemas';
 import { Panel, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+
+const citiesRowSchema = z.object({ data: z.array(locationSchema.pick({ id: true, name: true })) });
 
 const categories = [
   { id: '', label: 'All categories' },
@@ -26,18 +29,27 @@ export function ProvidersPage() {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
   const [verified, setVerified] = useState('');
+  const [location, setLocation] = useState('');
+  const [capability, setCapability] = useState('');
   const [page, setPage] = useState(1);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
+
+  const cities = useQuery({
+    queryKey: ['cities-options'],
+    queryFn: async () => citiesRowSchema.parse((await api.get('/cities')).data).data,
+  });
 
   const params = useMemo(
     () => ({
       query: query || undefined,
       category: category || undefined,
       is_verified: verified === '' ? undefined : verified,
+      location_id: location || undefined,
+      capability: capability || undefined,
       page,
       page_size: PAGE_SIZE,
     }),
-    [query, category, verified, page],
+    [query, category, verified, location, capability, page],
   );
 
   const providers = useQuery({
@@ -47,10 +59,10 @@ export function ProvidersPage() {
   });
 
   const totalPages = providers.data?.total_pages ?? 1;
-  const filtersActive = Boolean(query || category || verified);
+  const filtersActive = Boolean(query || category || verified || location || capability);
 
   const resetFilters = () => {
-    setQuery(''); setCategory(''); setVerified(''); setPage(1);
+    setQuery(''); setCategory(''); setVerified(''); setLocation(''); setCapability(''); setPage(1);
     if (searchParams.get('focus')) setSearchParams({}, { replace: true });
   };
 
@@ -108,6 +120,36 @@ export function ProvidersPage() {
               </button>
             ))}
           </div>
+          <select value={verified} onChange={(e) => { setVerified(e.target.value); setPage(1); }} aria-label="Filter by verification status"
+            className="rounded border border-border bg-surface-950 px-2.5 py-2 text-sm text-ink-100">
+            <option value="">Any verification</option>
+            <option value="true">Verified only</option>
+            <option value="false">Pending verification</option>
+          </select>
+          <select value={location} onChange={(e) => { setLocation(e.target.value); setPage(1); }} aria-label="Filter by city presence"
+            className="rounded border border-border bg-surface-950 px-2.5 py-2 text-sm text-ink-100">
+            <option value="">Any city presence</option>
+            {cities.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <label className="relative flex min-w-52 items-center">
+            <ClipboardList className="pointer-events-none absolute left-3 h-3 w-3 text-ink-400" />
+            <input
+              value={capability}
+              onChange={(e) => { setCapability(e.target.value); setPage(1); }}
+              placeholder="Capability…"
+              className="w-full rounded border border-border bg-surface-950 py-2 pl-8 pr-3 text-sm text-ink-100 placeholder:text-ink-400 focus:border-teal-accent/50"
+              aria-label="Filter by capability"
+            />
+          </label>
+
+          {filtersActive || searchParams.get('focus') ? (
+            <button onClick={resetFilters}
+              className="flex items-center gap-1.5 rounded border border-amber-flag/30 bg-amber-flag/10 px-3 py-2 text-xs font-medium text-amber-flag hover:bg-amber-flag/20">
+              <RotateCcw className="h-3 w-3" aria-hidden /> Reset filters
+            </button>
+          ) : null}
         </div>
         {providers.data ? (
           <p className="mt-3 text-xs text-ink-400">{providers.data.total} providers match · page {providers.data.page} of {providers.data.total_pages}</p>
@@ -137,20 +179,7 @@ export function ProvidersPage() {
                 <div>
                   <h3 className="text-[14px] font-semibold text-ink-100 group-hover:text-teal-accent">{p.name}</h3>
                   <p className="mt-0.5 text-xs text-ink-400">{p.subcategory ?? p.category.replace('_', ' ')}</p>
-          <select value={verified} onChange={(e) => { setVerified(e.target.value); setPage(1); }} aria-label="Filter by verification status"
-            className="rounded border border-border bg-surface-950 px-2.5 py-2 text-sm text-ink-100">
-            <option value="">Any verification</option>
-            <option value="true">Verified only</option>
-            <option value="false">Pending verification</option>
-          </select>
-
-          {filtersActive || searchParams.get('focus') ? (
-            <button onClick={resetFilters}
-              className="flex items-center gap-1.5 rounded border border-amber-flag/30 bg-amber-flag/10 px-3 py-2 text-xs font-medium text-amber-flag hover:bg-amber-flag/20">
-              <RotateCcw className="h-3 w-3" aria-hidden /> Reset filters
-            </button>
-          ) : null}
-        </div>
+                </div>
                 <Badge tone={p.is_verified ? 'teal' : 'amber'}>
                   <CheckCircle2 className="h-2.5 w-2.5" /> {p.is_verified ? 'verified' : 'pending'}
                 </Badge>

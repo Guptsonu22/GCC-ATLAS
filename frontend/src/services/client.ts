@@ -52,3 +52,24 @@ api.interceptors.response.use(
     return Promise.reject(new Error(message));
   },
 );
+
+export type TrackedEvent =
+  | 'search'
+  | 'detail_view'
+  | 'compare_create'
+  | 'compare_reopen'
+  | 'source_click'
+  | 'export'
+  | 'saved_create';
+
+/**
+ * Usage instrumentation (PRD §3.5): fire-and-forget beacon; engagement data
+ * only, no user-identifying payloads. Failures are swallowed — analytics must
+ * never break the user journey.
+ */
+export function track(name: TrackedEvent, properties?: Record<string, string>): void {
+  void api
+    .post('/events', { name, ...(properties ? { properties } : {}) })
+    .then(() => undefined)
+    .catch(() => undefined);
+}

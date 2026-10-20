@@ -17,6 +17,7 @@ export const providerFiltersSchema = z.object({
   query: z.string().trim().max(200).optional(),
   category: z.enum(['legal', 'tax', 'recruitment', 'payroll', 'eor', 'real_estate', 'consulting', 'immigration', 'other']).optional(),
   location_id: z.string().trim().max(60).optional(),
+  capability: z.string().trim().max(120).optional(),
   is_verified: z
     .enum(['true', 'false'])
     .optional()

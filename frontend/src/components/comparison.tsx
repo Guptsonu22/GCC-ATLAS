@@ -60,10 +60,19 @@ export function CityCompareTable({
             </tr>
           </thead>
           <tbody>
-            {metricNames.map((name) => (
+            {metricNames.map((name) => {
+              // Unit is shared per metric (locked by the backend metric registry);
+              // first city reporting it defines the row's unit label.
+              const unit = cities
+                .map((c) => (c.metrics ?? []).find((m) => m.metric_name === name)?.metric_unit)
+                .find((u) => Boolean(u)) ?? '';
+              return (
               <tr key={name} className="border-b border-border transition-colors last:border-0 hover:bg-surface-850/60">
                 <th scope="row" className={`${compact ? 'px-4' : 'px-5'} py-2.5 text-left text-xs font-normal text-ink-200`}>
-                  {METRIC_LABELS[name] ?? name}
+                  <span title={`Unit: ${unit || 'not specified'} · Geographic scope: city-level`}>
+                    {METRIC_LABELS[name] ?? name}
+                    {unit ? <span className="ml-1 font-mono text-[10px] text-ink-400">{unit}</span> : null}
+                  </span>
                 </th>
                 {cities.map((city) => {
                   const metric = (city.metrics ?? []).find((m) => m.metric_name === name);
@@ -74,7 +83,8 @@ export function CityCompareTable({
                   );
                 })}
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -102,6 +112,7 @@ export function MetricCell({ metric }: { metric: CityMetric | undefined }) {
   const low = metric.confidence_level === 'low';
   const title = [
     metric.metric_definition ?? '',
+    `Unit: ${metric.metric_unit ?? 'not specified'} · Geographic scope: city-level`,
     `Period: ${metric.metric_period ?? 'n/a'}`,
     metric.source_title ? `Source: ${metric.source_title} (${metric.source_verification_status ?? 'unverified'})` : '',
   ]

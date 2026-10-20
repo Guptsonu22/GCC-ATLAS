@@ -12,6 +12,8 @@ const database_1 = require("./db/database");
 const seed_1 = require("./db/seed");
 const env_1 = require("./utils/env");
 const request_logger_1 = require("./middleware/request-logger");
+const rate_limit_1 = require("./middleware/rate-limit");
+const events_1 = require("./routes/events");
 const companies_1 = require("./routes/companies");
 const cities_1 = require("./routes/cities");
 const providers_1 = require("./routes/providers");
@@ -27,12 +29,23 @@ async function createApp() {
     app.use((0, request_logger_1.requestLogger)(env.NODE_ENV));
     const db = await (0, database_1.getDatabase)();
     await (0, seed_1.ensureSeeded)();
+    // Rate limiting (Phase 6): generous global ceiling + strict tiers on
+    // expensive analysis endpoints and anonymous write endpoints. Disabled
+    // entirely when NODE_ENV=test.
+    const limiters = (0, rate_limit_1.createRateLimiters)(env.NODE_ENV);
+    app.use(limiters.global);
+    app.use('/api/assistant', limiters.analysis);
+    app.use('/api/cities/compare', limiters.analysis);
+    app.use('/api/dashboard', limiters.analysis);
+    app.use('/api/saved-research', limiters.writes);
+    app.use('/api/saved-comparisons', limiters.writes);
     app.use('/api/companies', (0, companies_1.companiesRoutes)(db));
     app.use('/api/cities', (0, cities_1.citiesRoutes)(db));
     app.use('/api/providers', (0, providers_1.providersRoutes)(db));
     app.use('/api/assistant', (0, assistant_1.assistantRoutes)(db));
     app.use('/api/saved-research', (0, saved_research_1.savedResearchRoutes)(db));
     app.use('/api/saved-comparisons', (0, saved_comparisons_1.savedComparisonsRoutes)(db));
+    app.use('/api/events', (0, events_1.eventsRoutes)(db, { writes: limiters.writes, analysis: limiters.analysis }));
     app.use('/api', (0, meta_1.metaRoutes)(db));
     app.use((_req, res) => {
         res.status(404).json({ error: { code: 'not_found', message: 'Route not found' } });

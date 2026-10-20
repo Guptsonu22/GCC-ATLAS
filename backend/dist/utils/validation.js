@@ -19,6 +19,7 @@ exports.providerFiltersSchema = zod_1.z.object({
     query: zod_1.z.string().trim().max(200).optional(),
     category: zod_1.z.enum(['legal', 'tax', 'recruitment', 'payroll', 'eor', 'real_estate', 'consulting', 'immigration', 'other']).optional(),
     location_id: zod_1.z.string().trim().max(60).optional(),
+    capability: zod_1.z.string().trim().max(120).optional(),
     is_verified: zod_1.z
         .enum(['true', 'false'])
         .optional()

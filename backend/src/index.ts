@@ -5,6 +5,8 @@ import { getDatabase, closeDatabase } from './db/database';
 import { ensureSeeded } from './db/seed';
 import { loadEnv, parseCorsOrigin } from './utils/env';
 import { requestLogger } from './middleware/request-logger';
+import { createRateLimiters } from './middleware/rate-limit';
+import { eventsRoutes } from './routes/events';
 import { companiesRoutes } from './routes/companies';
 import { citiesRoutes } from './routes/cities';
 import { providersRoutes } from './routes/providers';
@@ -23,12 +25,24 @@ export async function createApp(): Promise<express.Express> {
   const db = await getDatabase();
   await ensureSeeded();
 
+  // Rate limiting (Phase 6): generous global ceiling + strict tiers on
+  // expensive analysis endpoints and anonymous write endpoints. Disabled
+  // entirely when NODE_ENV=test.
+  const limiters = createRateLimiters(env.NODE_ENV);
+  app.use(limiters.global);
+  app.use('/api/assistant', limiters.analysis);
+  app.use('/api/cities/compare', limiters.analysis);
+  app.use('/api/dashboard', limiters.analysis);
+  app.use('/api/saved-research', limiters.writes);
+  app.use('/api/saved-comparisons', limiters.writes);
+
   app.use('/api/companies', companiesRoutes(db));
   app.use('/api/cities', citiesRoutes(db));
   app.use('/api/providers', providersRoutes(db));
   app.use('/api/assistant', assistantRoutes(db));
   app.use('/api/saved-research', savedResearchRoutes(db));
   app.use('/api/saved-comparisons', savedComparisonsRoutes(db));
+  app.use('/api/events', eventsRoutes(db, { writes: limiters.writes, analysis: limiters.analysis }));
   app.use('/api', metaRoutes(db));
 
   app.use((_req, res) => {
