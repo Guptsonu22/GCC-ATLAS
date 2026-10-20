@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ExternalLink, CalendarDays, MapPin, ShieldCheck, ShieldAlert, Quote, Building2, Briefcase } from 'lucide-react';
+import { z } from 'zod';
 import { api } from '../services/client';
 import { companyDetailComposedSchema, announcementSchema } from '../services/schemas';
 import { Panel, PanelHeader, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';

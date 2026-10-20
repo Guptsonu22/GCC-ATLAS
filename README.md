@@ -80,5 +80,6 @@ architecture/  architecture.md + api-contract.md (Phase 3 docs)
 ## Known limitations
 
 - Assistant demo mode is deterministic (dataset answers, no external calls).
-- 918 kB React chunk pending code-split before production deploy.
+- 960 kB React chunk pending code-split before production deploy.
 - Product name collision flagged in Phase 1 (`gcc-atlas.com`) — trademark/rename gate pre-launch.
+- Saved rows store `location_ids` as a JSON-encoded string (documented in `architecture/api-contract.md`).

@@ -218,6 +218,17 @@ export const assistantStatusSchema = z.object({
   description: z.string(),
 });
 
+/** Shape of GET /api/health (degradations keep the same keys with status/database==='error'). */
+export const healthSchema = z.object({
+  status: z.enum(['ok', 'degraded']),
+  service: z.string(),
+  version: z.string(),
+  mode: z.string(),
+  database: z.enum(['ok', 'error']),
+  uptime_seconds: z.number(),
+  time: z.string(),
+});
+
 export const savedResearchSchema = z.object({
   id: z.string(),
   session_key: z.string(),

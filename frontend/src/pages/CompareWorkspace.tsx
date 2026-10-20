@@ -4,6 +4,7 @@ import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-quer
 import { Plus, Check, Trash2, Link2, Download, BookmarkPlus, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { api } from '../services/client';
+import { parseSavedIds } from '../utils/cityIds';
 import { cityDetailSchema, savedComparisonSchema, type SavedComparison } from '../services/schemas';
 import { Panel, PanelHeader, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
 import { CityCompareTable, POLICY_STATUS_HINTS } from '../components/comparison';
@@ -22,8 +23,7 @@ export function CompareWorkspacePage() {
 
   // Selection lives in the URL (?ids=a,b,c) so comparisons are shareable and refresh-safe.
   const ids = useMemo(() => {
-    const raw = searchParams.get('ids') ?? '';
-    const parsed = raw.split(',').map((s) => s.trim()).filter(Boolean);
+    const parsed = parseSavedIds(searchParams.get('ids'));
     // ?add=id from the global search / city pages — appended up to the max.
     const add = searchParams.get('add');
     const merged = parsed;

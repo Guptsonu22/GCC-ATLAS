@@ -8,7 +8,7 @@ import axios from 'axios';
 import { z } from 'zod';
 
 import {
-  companyDetailComposedSchema,
+  companySchema,
   healthSchema,
   locationSchema,
   policyRecordSchema,
@@ -115,8 +115,9 @@ describe('live backend smoke (real API, frontend schemas)', () => {
     expect(companies.length).toBeGreaterThan(0);
     const first = companies[0]!.id;
     const detailRes = await axios.get(`${BASE}/companies/${first}`);
-    const detail = companyDetailComposedSchema.parse(detailRes.data);
-    expect(detail.company.id).toBe(first);
+    // /companies/:id returns the raw company row; pages wrap it as { company: row }.
+    const company = companySchema.parse(detailRes.data);
+    expect(company.id).toBe(first);
   });
 
   it('GET /providers exposes capability_list arrays from the live API', async () => {
@@ -153,7 +154,9 @@ describe('live backend smoke (real API, frontend schemas)', () => {
 
       const created = await axios.post(`${BASE}/saved-comparisons`, { name: 'smoke test', location_ids: ids }, { headers });
       const saved = savedComparisonSchema.parse(created.data);
-      expect(saved.location_ids).toEqual(ids);
+      // Storage contract: location_ids is a JSON-encoded string column; pages decode it.
+      expect(typeof saved.location_ids).toBe('string');
+      expect(JSON.parse(saved.location_ids)).toEqual(ids);
 
       const list = await axios.get(`${BASE}/saved-comparisons`, { headers });
       expect(z.object({ data: z.array(savedComparisonSchema) }).parse(list.data).data.some((x) => x.id === saved.id)).toBe(true);
