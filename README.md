@@ -203,8 +203,8 @@ For detailed alternative runbooks (Railway, Docker, Fly.io), consult [`deploymen
 
 ## 13. Submission Deliverables
 
-- **Strategy Deck (PPTX):** [`product/deck/gcc-atlas-strategy-deck.pptx`](product/deck/gcc-atlas-strategy-deck.pptx)
-- **Strategy Deck (PDF):** [`product/deck/gcc-atlas-strategy-deck.pdf`](product/deck/gcc-atlas-strategy-deck.pdf)
+- **Strategy Deck (PPTX):** [`submission/GCC-Atlas-Strategy-Deck.pptx`](submission/GCC-Atlas-Strategy-Deck.pptx) *(also at `product/deck/gcc-atlas-strategy-deck.pptx`)*
+- **Strategy Deck (PDF):** [`submission/GCC-Atlas-Strategy-Deck.pdf`](submission/GCC-Atlas-Strategy-Deck.pdf) *(also at `product/deck/gcc-atlas-strategy-deck.pdf`)*
 - **Final Audit Report:** [`submission/FINAL-AUDIT.md`](submission/FINAL-AUDIT.md)
 - **Submission Checklist:** [`submission/FINAL-CHECKLIST.md`](submission/FINAL-CHECKLIST.md)
 - **Reviewer Demo Walkthrough:** [`submission/DEMO-WALKTHROUGH.md`](submission/DEMO-WALKTHROUGH.md)
