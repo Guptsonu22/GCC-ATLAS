@@ -68,11 +68,39 @@ Row highlights: `status` (never fake-active), `normalized_benefits` = JSON array
 |---|---|---|
 | GET | `/announcements` | `company_id`, `location_id`, `announcement_type` (`expansion\|new_center\|hiring\|investment\|partnership\|policy\|closure\|other`), `days` (1–3650), pagination |
 
-### Assistant (deterministic, cited)
+### Assistant (Phase 7 research pipeline)
 | Method | Path | Notes |
 |---|---|---|
 | GET | `/assistant/status` | `{ai_configured, mode:'deterministic-demo'\|'llm', description}` |
-| POST | `/assistant/query` | Body `{query: string (3–1000 chars), use_demo_mode?: boolean}`. Response `{answer, citations:[{source_id,title,url,publication_date,relevant_excerpt}] (≤8), confidence, is_demo_mode, insufficient_evidence}`. Short query → 400; assistant mode derives from `AI_API_KEY`. |
+| POST | `/assistant/query` | Body `{query: string (3–1000 chars), use_demo_mode?: boolean}`. Analysis-tier rate limit applies. |
+
+**Research pipeline** (server-side only; `AI_API_KEY` never leaves the backend):
+1. zod-validated question (control characters stripped).
+2. Entity identification: cities (+ spelling aliases), states, companies, sectors, providers, announcement time windows (`recent` → 90 d, `quarter` → 120 d, `last year` → 365 d).
+3. Bounded retrieval (caps: 4 cities, 6 metrics/city, 8 companies, 4 related, 8 policies, 12 announcements, 8 providers, 12 evidence sources, 14 k context chars) with a **citation whitelist** built only from retrieved rows.
+4. Context package → the configured OpenAI-compatible LLM (strict JSON contract; fetched with `AbortController` timeout `AI_TIMEOUT_MS`, `max_tokens` ≤ 1000) — only when a key is present AND `use_demo_mode` is false AND the pack is non-empty.
+5. Zod-shaped structured answer; **citation-id validation**: `source_ids` not in the whitelist are stripped per-fact; facts left with zero valid ids are dropped; the sources vocabulary limits to real records and valid URLs.
+6. Provider failure (500/timeout/malformed) → HTTP 502/504 `{error:{code:'assistant_provider_error', retryable}}` — the API **never** silently substitutes invented output.
+7. Empty retrieval → deterministic honest insufficiency (never a model call).
+
+Response shape:
+```json
+{
+  "mode": "llm | demo", "is_demo_mode": bool, "confidence": "high|medium|low",
+  "insufficient_evidence": bool,
+  "answer": {
+    "direct_answer": string,
+    "key_findings": string[],
+    "comparison_table": {"caption": string, "columns": string[], "rows": [{"label": string, "values": (string|null)[]}] } | null,
+    "evidence_facts": [{"statement": string, "source_ids": string[]}],
+    "recommendations": [{"text": string, "basis": string}],   // always separated from facts
+    "assumptions": string[], "missing_information": string[], "next_step": string|null
+  },
+  "citations": [{"source_id","title","url","publication_date","relevant_excerpt","verification_status"}],
+  "retrieval": {"matched": {...}, "records_included": n, "evidence_sources": n, "time_window_days": n|null}
+}
+```
+Demo mode composes the identical structure deterministically from the same retrieval (rule-based recommendations carry `basis: 'Rule-based heuristic…'`); security rules: source text is sanitized (control chars stripped, bounded) and the system prompt declares all record content untrusted data — the model can neither execute SQL/code nor alter retrieval.
 
 ### Saved research (session-scoped)
 | Method | Path | Notes |

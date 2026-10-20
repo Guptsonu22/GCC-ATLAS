@@ -100,7 +100,8 @@ describe('assistant (deterministic demo mode, Phase 7 structured contract)', () 
     const service = createAssistantService(db);
     const response = await service.answer({ query: 'Compare Bengaluru\u0000 and Hyderabad\u0013 office costs' });
     expect(response.answer.direct_answer.length).toBeGreaterThan(0);
-    expect(response.answer.direct_answer).not.toMatch(/[\u0000-\u001f]/);
+    const hasCtrl = [...response.answer.direct_answer].some((ch) => (ch.codePointAt(0) ?? 65) < 32);
+    expect(hasCtrl).toBe(false);
   });
 
   it('the compute answer path flags recommendations as rule-based (not model output)', async () => {

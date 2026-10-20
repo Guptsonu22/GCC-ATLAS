@@ -1,4 +1,9 @@
 "use strict";
+/**
+ * AI Research Assistant — public service surface.
+ * Kept as a module folder under services/assistant/ (retrieval, llm, service)
+ * to keep the Phase-7 pipeline testable and reviewable piece by piece.
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createRetrieval = exports.AssistantProviderError = exports.createAssistantService = void 0;
 var service_1 = require("./assistant/service");

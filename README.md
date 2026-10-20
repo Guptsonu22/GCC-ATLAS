@@ -39,7 +39,7 @@ Open **http://localhost:5173**. The first startup also seeds if the DB is empty
 ## Quality gates (all verified)
 
 ```bash
-npm run test        # backend vitest suite (41 tests)
+npm run test        # backend vitest suite (93 tests)
 npm run typecheck   # backend tsc + frontend tsc
 npm run lint        # oxlint on both apps
 npm run build       # backend tsc+copy schema, frontend vite build
@@ -57,8 +57,18 @@ npm run seed        # deterministic SQLite seed (add -- --reset via --prefix run
 | `AI_API_KEY` | *(empty)* | optional; empty = deterministic demo assistant |
 | `AI_BASE_URL` | `https://api.openai.com/v1` | OpenAI-compatible endpoint |
 | `AI_MODEL` | `gpt-4o-mini` | LLM model id |
+| `AI_TIMEOUT_MS` | `30000` | provider-call abort window (Phase 7) |
+| `AI_MAX_TOKENS` | `800` | cap on model answer tokens (clamped 200–1000) |
+| `RATE_LIMIT_WINDOW_MS` / `*_MAX` | 15 min / 600 / 40 / 60 | rate-limit tiers (global / analysis / writes) |
 
 `backend/.env` is git-ignored; never commit real keys.
+
+## AI research assistant (Phase 7)
+
+- **Pipeline**: validated question → entity identification (cities + aliases, states, companies, providers, `recent` → 90-day window) → **bounded retrieval** with a citation whitelist built only from retrieved rows → context package → server-side LLM call (strict JSON contract, timeout + token caps) → zod-shaped structured answer → **citation-id validation** (unknown source ids are stripped per fact).
+- **Answer format**: direct answer, key findings, comparison table, evidence-backed facts, recommendations clearly separated from facts (`basis` labels them as model/rule judgments), assumptions, missing information & uncertainty, suggested next step.
+- **Demo mode**: with no `AI_API_KEY` (or "Force demo mode" on the Assistant page), responses are composed deterministically from the same retrieval — labelled demo, never inventing content. Provider failures with a key configured return `502 {error:{code:'assistant_provider_error', retryable}}` — **never** silently substituted output.
+- **Security**: the key never reaches the browser; retrieval treats source text as untrusted data (control characters stripped, bounded); the model cannot execute SQL or code; event beacons and provider errors are logged without user question content (request logging carries method/path/status only).
 
 ## Saved records & sessions (no accounts in v1)
 

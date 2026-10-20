@@ -15,11 +15,14 @@ const METRIC_LABELS: Record<string, string> = {
 /** Collapse description/source text into safe, bounded context strings. */
 function clean(text: unknown, maxLen = 320): string {
   if (text === null || text === undefined) return '';
-  return String(text)
-    .replace(/[\u0000-\u001f]+/g, ' ') // strip control characters (prompt-injection hardening)
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, maxLen);
+  let out = '';
+  for (const ch of String(text)) {
+    const code = ch.codePointAt(0) ?? 65;
+    // strip control characters (prompt-injection hardening) — keep space/tabs
+    if (code < 32 && code !== 9) continue;
+    out += ch;
+  }
+  return out.replace(/\s+/g, ' ').trim().slice(0, maxLen);
 }
 
 export function createAssistantService(db: Database) {
@@ -135,7 +138,9 @@ export function createAssistantService(db: Database) {
         .filter((m) => m.source_id && m.metric_value !== null)
         .map((m) => ({ statement: `${String(m.city_name)} — ${METRIC_LABELS[String(m.metric_name)] ?? String(m.metric_name)} = ${m.metric_value} ${String(m.metric_unit ?? '')}`, source_ids: [String(m.source_id)] }));
       a.assumptions = ['City metrics are estimates from public commentary with stated confidence levels.'];
-      a.missing_information = missingForCities(retrieved, [name]);
+      a.missing_information = missingForCities(retrieved, [name]).concat([
+        'Function-level compensation, live leasing absorption and ground-truth policy meetings are not tracked at city level in this dataset.',
+      ]);
       a.next_step = `Compare ${name} against another hub to see relative strengths.`;
       return a;
     }
