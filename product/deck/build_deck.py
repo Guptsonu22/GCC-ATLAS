@@ -294,8 +294,8 @@ s = prs.slides.add_slide(BLANK)
 chrome(s, 8, 'Product walkthrough — genuine prototype captures', 'SCREENSHOTS (headless-browser captures of the running build)')
 pic_panel(s, 'compare.png', 0.55, 1.55, 7.55, 2.5, 'Compare Workspace: Bengaluru vs Pune — EST flags, metric definitions, provenance chips, save/copy-link.')
 pic_panel(s, 'assistant-answer.png', 8.25, 1.55, 4.53, 2.5, 'Assistant: structured, cited answer (demo mode).')
-pic_panel(s, 'sources.png', 0.55, 4.55, 7.55, 2.24, 'Sources: publisher, confidence, verification date + reverse "where used" per source.')
-pic_panel(s, 'dashboard.png', 8.25, 4.55, 4.53, 2.24, 'Dashboard: dataset-scope counters + verification ledger.')
+pic_panel(s, 'sources.png', 0.55, 4.55, 7.55, 2.18, 'Sources: publisher, confidence, verification date + reverse "where used" per source.')
+pic_panel(s, 'dashboard.png', 8.25, 4.55, 4.53, 2.18, 'Dashboard: dataset-scope counters + verification ledger.')
 
 # ============================================================================
 # SLIDE 9 — Positioning & adoption
