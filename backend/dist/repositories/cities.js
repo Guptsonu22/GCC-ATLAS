@@ -22,7 +22,9 @@ function createCitiesRepo(db) {
     }
     async function compareCities(ids) {
         const placeholders = ids.map(() => '?').join(',');
-        const locations = await db.all(`SELECT * FROM locations WHERE id IN (${placeholders})`, ids);
+        const locations = await db.all(`SELECT l.*,
+        (SELECT COUNT(DISTINCT cl.company_id) FROM company_locations cl WHERE cl.location_id = l.id) AS tracked_company_count
+       FROM locations l WHERE l.id IN (${placeholders})`, ids);
         const metrics = await db.all(`SELECT m.*, s.title AS source_title, s.url AS source_url, s.verification_status AS source_verification_status
        FROM city_metrics m LEFT JOIN source_records s ON s.id = m.source_id
        WHERE m.location_id IN (${placeholders}) ORDER BY m.metric_name ASC`, ids);
