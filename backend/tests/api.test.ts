@@ -65,11 +65,15 @@ describe('API integration', () => {
     expect(res.body.mode).toBe('deterministic-demo');
   });
 
-  it('assistant query returns demo answer with citations', async () => {
+  it('assistant query returns structured demo answer with citations', async () => {
     const res = await request(app).post('/api/assistant/query').send({ query: 'Compare Bengaluru and Hyderabad office costs' });
     expect(res.status).toBe(200);
     expect(res.body.is_demo_mode).toBe(true);
+    expect(res.body.mode).toBe('demo');
+    expect(typeof res.body.answer.direct_answer).toBe('string');
+    expect(res.body.answer.key_findings).toBeInstanceOf(Array);
     expect(res.body.citations).toBeInstanceOf(Array);
+    expect(res.body.retrieval.matched.cities).toBeGreaterThanOrEqual(2);
   });
 
   it('assistant rejects short queries', async () => {

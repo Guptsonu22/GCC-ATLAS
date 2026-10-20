@@ -52,13 +52,22 @@ async function createApp() {
     });
     const errorHandler = (err, _req, res, _next) => {
         const status = err.status ?? 500;
+        const assistantCode = err.code;
+        const code = assistantCode === 'assistant_provider_error'
+            ? 'assistant_provider_error'
+            : status === 400
+                ? 'validation_error'
+                : status === 404
+                    ? 'not_found'
+                    : 'internal_error';
         if (status >= 500)
-            console.error('Unhandled API error:', err);
+            console.error(`API error [${code}]:`, err instanceof Error ? err.message : err);
         res.status(status).json({
             error: {
-                code: status === 400 ? 'validation_error' : status === 404 ? 'not_found' : 'internal_error',
+                code,
                 message: err instanceof Error ? err.message : 'Unknown error',
                 details: err.details,
+                ...(code === 'assistant_provider_error' ? { retryable: err.retryable ?? false } : {}),
             },
         });
     };

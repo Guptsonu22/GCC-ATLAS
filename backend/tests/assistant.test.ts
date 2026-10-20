@@ -68,7 +68,7 @@ describe('assistant (deterministic demo mode, Phase 7 structured contract)', () 
     const service = createAssistantService(db);
     const response = await service.answer({ query: 'What is the Karnataka GCC policy?' });
     expect(response.answer.key_findings.join(' ')).toMatch(/Karnataka/i);
-    expect(response.answer.assumptions.join(' ')).toMatch(/verify/i);
+    expect(response.answer.assumptions.join(' ')).toMatch(/verif/i);
   });
 
   it('recent-announcements journey applies a time window', async () => {

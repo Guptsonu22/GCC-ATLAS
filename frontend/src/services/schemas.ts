@@ -214,7 +214,28 @@ export const announcementSchema = z.object({
 });
 
 export const aiQueryResponseSchema = z.object({
-  answer: z.string(),
+  mode: z.enum(['llm', 'demo']),
+  is_demo_mode: z.boolean(),
+  confidence: z.enum(['high', 'medium', 'low']),
+  insufficient_evidence: z.boolean(),
+  answer: z.object({
+    direct_answer: z.string(),
+    key_findings: z.array(z.string()),
+    comparison_table: z
+      .object({
+        caption: z.string(),
+        columns: z.array(z.string()),
+        rows: z.array(z.object({ label: z.string(), values: z.array(z.string().nullable()) })),
+      })
+      .nullable(),
+    evidence_facts: z.array(
+      z.object({ statement: z.string(), source_ids: z.array(z.string()) }),
+    ),
+    recommendations: z.array(z.object({ text: z.string(), basis: z.string() })),
+    assumptions: z.array(z.string()),
+    missing_information: z.array(z.string()),
+    next_step: z.string().nullable(),
+  }),
   citations: z.array(
     z.object({
       source_id: z.string(),
@@ -222,11 +243,17 @@ export const aiQueryResponseSchema = z.object({
       url: z.string(),
       publication_date: z.string().nullable(),
       relevant_excerpt: z.string(),
+      verification_status: z.string().nullable(),
     }),
   ),
-  confidence: z.enum(['high', 'medium', 'low']),
-  is_demo_mode: z.boolean(),
-  insufficient_evidence: z.boolean(),
+  retrieval: z
+    .object({
+      matched: z.record(z.string(), z.number()),
+      records_included: z.number(),
+      evidence_sources: z.number(),
+      time_window_days: z.number().nullable(),
+    })
+    .optional(),
 });
 
 export const assistantStatusSchema = z.object({

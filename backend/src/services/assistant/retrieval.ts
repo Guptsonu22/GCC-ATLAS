@@ -30,7 +30,6 @@ const CITY_ALIASES: Record<string, string> = {
   kolkata: 'Kolkata', calcutta: 'Kolkata', noida: 'Noida',
 };
 
-const RECENT_WORDS = new Set(['recent', 'recently', 'latest', 'new', 'fresh', 'ongoing', 'current']);
 const TIME_WINDOW_DAYS = 90;
 
 // Hard caps — retrieval must never ship an unbounded context.
@@ -50,11 +49,29 @@ function tokenize(q: string): string[] {
   return q.toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length > 2 && !STOPWORDS.has(t));
 }
 
+/** Tolerant recent-window filter for announcement dates of mixed precision. */
+function filterRecent(rows: Record<string, unknown>[], windowDays: number): Record<string, unknown>[] {
+  const cutoff = new Date(Date.now() - windowDays * 86_400_000);
+  const cutoffYear = cutoff.getUTCFullYear();
+  const cutoffMonth = cutoff.getUTCMonth() + 1;
+  return rows.filter((row) => {
+    const raw = String(row.announcement_date ?? '');
+    if (!raw) return false;
+    if (/^\d{4}$/.test(raw)) return Number(raw) >= cutoffYear; // year-only precision
+    if (/^\d{4}-\d{2}$/.test(raw)) {
+      const parts = raw.split('-').map(Number);
+      return parts[0]! > cutoffYear || (parts[0] === cutoffYear && parts[1]! >= cutoffMonth);
+    }
+    const parsed = new Date(raw.slice(0, 10).concat('T00:00:00Z')).getTime();
+    return Number.isFinite(parsed) && parsed >= cutoff.getTime();
+  });
+}
+
 export function detectTimeWindowDays(q: string): number | null {
   const lower = q.toLowerCase();
   if (/\blast\s+year\b|\bthis\s+year\b|\b12\s*months\b/.test(lower)) return 365;
   if (/\bquarter\b|\b3\s*months\b/.test(lower)) return 120;
-  if (/\brecent|latest\b|new/ .test(lower) ) return TIME_WINDOW_DAYS;
+  if (/\b(recent|recently|latest|new|current)\b|newest/.test(lower)) return TIME_WINDOW_DAYS;
   return null;
 }
 
@@ -122,7 +139,6 @@ export function createRetrieval(db: Database) {
        LEFT JOIN companies c ON c.id = a.company_id
        LEFT JOIN locations l ON l.id = a.location_id
        LEFT JOIN source_records s ON s.id = a.source_id
-       ${timeWindowDays ? `WHERE a.announcement_date >= datetime('now', '-${Number(timeWindowDays)} days')` : ''}
        ORDER BY a.announcement_date DESC`,
     )) as Record<string, unknown>[];
 
@@ -178,7 +194,12 @@ export function createRetrieval(db: Database) {
 
     const matchedPolicies = policies.filter((p) => matches(p.title as string) || matches(p.state as string)).slice(0, RETRIEVAL_CAPS.policies);
 
-    const matchedAnnouncements = announcements.filter(
+    // Seed announcement dates vary in precision ('2026', '2026-05', full dates).
+    // The recent-window filter is therefore applied tolerantly in JS: imprecise
+    // dates are kept when their coarse period could fall inside the window.
+    const windowAnnouncements = timeWindowDays ? filterRecent(announcements, timeWindowDays) : announcements;
+
+    const matchedAnnouncements = windowAnnouncements.filter(
       (a) =>
         matches(a.title as string) ||
         matches(a.company_name as string) ||
