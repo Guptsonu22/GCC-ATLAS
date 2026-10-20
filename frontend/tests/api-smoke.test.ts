@@ -43,6 +43,9 @@ beforeAll(async () => {
   dbPath = path.join(workDir, 'smoke.db');
   const env = { ...process.env, PORT: String(PORT), DB_PATH: dbPath, NODE_ENV: 'test' };
 
+  // Seed idempotently from the CLI build first to avoid SQLite concurrency lock race:
+  await runNode(path.join(BACKEND, 'dist', 'db', 'seed.js'), env);
+
   child = spawn(process.execPath, [path.join(BACKEND, 'dist', 'index.js')], {
     env,
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -50,9 +53,6 @@ beforeAll(async () => {
   child.on('error', (e) => {
     throw e;
   });
-
-  // dist/index.js applies migrations on boot; seed idempotently from the CLI build.
-  await runNode(path.join(BACKEND, 'dist', 'db', 'seed.js'), env);
 
   // Wait for the server to accept requests.
   const deadline = Date.now() + 15_000;
