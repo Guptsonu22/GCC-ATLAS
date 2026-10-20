@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Search, X, ChevronLeft, ChevronRight, ExternalLink, ShieldCheck, ShieldAlert, Database } from 'lucide-react';
+import { Search, X, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, ShieldCheck, ShieldAlert, Database } from 'lucide-react';
 import { z } from 'zod';
 import { api } from '../services/client';
-import { sourceSchema } from '../services/schemas';
+import { sourceSchema, sourceUsageSchema } from '../services/schemas';
 import type { Source } from '../services/schemas';
 import { Panel, Badge, Spinner, ErrorState, EmptyState, PageHeader } from '../components/ui';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -162,6 +162,7 @@ export function SourcesPage() {
 
 function SourceCard({ source }: { source: Source }) {
   const tone = STATUS_TONES[source.verification_status] ?? 'neutral';
+  const [open, setOpen] = useState(false);
   return (
     <Panel className="p-4">
       <div className="flex items-start justify-between gap-3">
@@ -188,8 +189,68 @@ function SourceCard({ source }: { source: Source }) {
               {source.publication_date ? `Published ${source.publication_date} · ` : ''}Last verified {source.last_verified_date.slice(0, 10)}
             </span>
           </div>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls={`usage-${source.id}`}
+            className="mt-3 flex items-center gap-1 rounded border border-border bg-surface-800 px-2.5 py-1 text-[11px] font-medium text-ink-200 hover:bg-surface-700"
+          >
+            <ChevronDown className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
+            {open ? 'Hide evidence trail' : 'Show evidence trail (what cites this source)'}
+          </button>
         </div>
       </div>
+      {open ? <SourceUsage sourceId={source.id} /> : null}
     </Panel>
+  );
+}
+
+function SourceUsage({ sourceId }: { sourceId: string }) {
+  const usage = useQuery({
+    queryKey: ['source-usage', sourceId],
+    queryFn: async () => {
+      const body = (await api.get(`/source-records/${sourceId}`)).data;
+      return sourceUsageSchema.parse(body);
+    },
+  });
+
+  return (
+    <div id={`usage-${sourceId}`} className="mt-3 rounded border border-border bg-surface-950/60 p-4" data-testid={`usage-${sourceId}`}>
+      {usage.isLoading ? (
+        <Spinner label="Loading evidence trail…" />
+      ) : usage.isError ? (
+        <ErrorState message={(usage.error as Error).message} onRetry={() => usage.refetch()} />
+      ) : (
+        (() => {
+          const u = usage.data!.usage;
+          const sections: { title: string; tone: 'teal' | 'cyan' | 'amber' | 'neutral'; items: string[] }[] = ( [
+            { title: 'Companies using this source', tone: 'teal', items: u.companies.map((c) => c.name) },
+            { title: 'Policy records', tone: 'cyan', items: u.policies.map((p) => `${p.title} (${p.state}, ${p.status})`) },
+            { title: 'Announcements', tone: 'neutral', items: u.announcements.map((a) => `${a.announcement_date} — ${a.title}`) },
+            { title: 'City metrics', tone: 'amber', items: u.metrics.map((m) => `${m.location_name}: ${m.metric_name.replace(/_/g, ' ')} (${m.metric_period})`) },
+            { title: 'Service providers', tone: 'neutral', items: u.providers.map((p) => `${p.name} (${p.category})`) },
+          ] as const).filter((sec) => (sec.items.length > 0) && (sec.tone === 'teal' || sec.tone === 'cyan' || sec.tone === 'amber' || sec.tone === 'neutral'));
+          if (sections.length === 0) {
+            return <p className="text-xs text-ink-400">No records currently cite this source (it may be a reserved placeholder or awaiting re-linking).</p>;
+          }
+          return (
+            <div className="space-y-3">
+              {sections.map((sec) => (
+                <div key={sec.title}>
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-ink-400">
+                    {sec.title} <span className="ml-1 font-mono text-[10px] text-ink-400">({sec.items.length})</span>
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {sec.items.map((item) => (
+                      <Badge key={item} tone={sec.tone}>{item}</Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()
+      )}
+    </div>
   );
 }

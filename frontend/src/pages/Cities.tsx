@@ -90,7 +90,10 @@ function CityCard({ city, onOpen }: { city: Location; onOpen: () => void }) {
       </p>
       <p className="mt-3 font-mono text-2xl font-semibold text-ink-100">
         {city.tracked_company_count ?? 0}
-        <span className="ml-1.5 align-middle text-[10px] font-normal uppercase tracking-wider text-ink-400">tracked GCCs</span>
+        <span className="ml-1.5 align-middle text-[10px] font-normal uppercase tracking-wider text-ink-400">tracked companies</span>
+      </p>
+      <p className="mt-1 text-[10px] leading-relaxed text-ink-400">
+        Companies with any recorded operating location here — not all are GCC-type centers; evidence status is shown per company.
       </p>
       <div className="mt-auto flex gap-2 pt-4">
         <button

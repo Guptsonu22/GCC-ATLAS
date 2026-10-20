@@ -246,6 +246,20 @@ export const healthSchema = z.object({
   time: z.string(),
 });
 
+/** Shape of GET /api/source-records/:id — evidence explorer with reverse usage. */
+export const sourceUsageSchema = z.object({
+  source: sourceSchema,
+  usage: z.object({
+    companies: z.array(z.object({ id: z.string(), name: z.string() })),
+    policies: z.array(z.object({ id: z.string(), title: z.string(), state: z.string(), status: z.string() })),
+    announcements: z.array(z.object({ id: z.string(), title: z.string(), announcement_date: z.string(), announcement_type: z.string(), company_id: z.string().nullable() })),
+    metrics: z.array(z.object({ location_id: z.string(), location_name: z.string(), metric_name: z.string(), metric_period: z.string() })),
+    providers: z.array(z.object({ id: z.string(), name: z.string(), category: z.string() })),
+  }),
+});
+
+export type SourceWithUsage = z.infer<typeof sourceUsageSchema>;
+
 export const savedResearchSchema = z.object({
   id: z.string(),
   session_key: z.string(),

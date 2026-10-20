@@ -70,12 +70,28 @@ with automated cross-session isolation tests — see
 ## Repo layout
 
 ```
-backend/     Express API, SQLite schema/seeds/tests
-frontend/    React SPA (7 pages, provenance-first UI)
+backend/     Express API, SQLite schema/import pipeline/tests
+frontend/    React SPA (provenance-first UI)
 product/     Phase 2: PRD, personas, journeys, metrics, roadmap, brief
 research/    Phase 1: 40-source register, market analysis, conflict log
 architecture/  architecture.md + api-contract.md (Phase 3 docs)
+data/        data-dictionary.md + collection-methodology.md (Phase 5)
 ```
+
+## Data pipeline (Phase 5)
+
+```bash
+npm run seed              # validate-first import of the curated dataset (349 rows)
+npm run seed -- --check   # validate only, exit 1 on any data-quality error
+```
+
+- Quality rules enforced in `backend/src/data/quality.ts` (URL integrity, GCC-evidence typing,
+  identity-collision detection, metric unit/period registry, policy expiry consistency,
+  demonstrative labeling, conflict notes, stale-evidence dates).
+- Import is rerun-safe: upserts by stable ids, never duplicates, never touches user-saved data.
+- Evidence explorer: every source record exposes what cites it (`GET /api/source-records/:id`
+  → `usage`), rendered on the Sources page.
+- Definitions for tracked/verified/awaiting/stale/conflicting live in `data/data-dictionary.md`.
 
 ## Known limitations
 
