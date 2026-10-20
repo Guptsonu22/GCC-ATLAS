@@ -96,6 +96,11 @@ npm run seed -- --check   # validate only, exit 1 on any data-quality error
 ## Known limitations
 
 - Assistant demo mode is deterministic (dataset answers, no external calls).
+- Provider rankings are deliberately not implemented: no defensible ratings methodology or
+  supporting data exists yet, so the directory offers evidence-backed filters instead.
+- Rate limiting uses per-process memory store (single instance only); swap in a shared
+  store before horizontal scaling (`backend/src/middleware/rate-limit.ts`).
+- Event analytics store only a truncated hash of session keys — no cross-session identity.
 - 960 kB React chunk pending code-split before production deploy.
 - Product name collision flagged in Phase 1 (`gcc-atlas.com`) — trademark/rename gate pre-launch.
 - Saved rows store `location_ids` as a JSON-encoded string (documented in `architecture/api-contract.md`).

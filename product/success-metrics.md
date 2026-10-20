@@ -59,3 +59,20 @@
 ---
 
 *Companion artifacts: `user-journeys.md` (event catalog), `feature-prioritization.md` (F10 instrument), `business-model.md` §6 (pricing tests). Prepared 2026-10-19.*
+
+---
+
+## Instrumented event catalog (Phase 6 implementation note)
+The beacon contract lives at `POST /api/events` (202-accept ingest, aggregate read via `GET /api/events/summary`; no PII — the session key, if sent, is stored only as a truncated hash). Implemented emit points:
+
+| Event | Trigger | properties |
+|---|---|---|
+| `search` | Explorer keyword query settles (500 ms debounce) | `surface` |
+| `detail_view` | A company record page finishes loading its data | `kind`, `ref` |
+| `compare_create` | A city comparison is successfully saved | `city_count` |
+| `compare_reopen` | A saved comparison is loaded back into the workspace | `source`, `city_count` |
+| `source_click` | A user leaves for an evidence URL from a record | `kind`, `ref` |
+| `export` | A workspace CSV export is generated | `format`, `city_count` |
+| `saved_create` | A company profile is saved via “Save to my session” | `kind`, `ref` |
+
+G4 still applies: with pre-launch traffic these aggregates are small-n — read them as directional, never as trends.

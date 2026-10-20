@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.savedComparisonCreateSchema = exports.sessionKeySchema = exports.savedResearchUpdateSchema = exports.savedResearchCreateSchema = exports.assistantSchema = exports.compareSchema = exports.announcementFiltersSchema = exports.policyFiltersSchema = exports.sourceFiltersSchema = exports.providerFiltersSchema = exports.companyFiltersSchema = void 0;
+exports.savedComparisonCreateSchema = exports.savedComparisonPatchSchema = exports.sessionKeySchema = exports.savedResearchUpdateSchema = exports.savedResearchCreateSchema = exports.assistantSchema = exports.compareSchema = exports.announcementFiltersSchema = exports.policyFiltersSchema = exports.sourceFiltersSchema = exports.providerFiltersSchema = exports.companyFiltersSchema = void 0;
 exports.parseOr400 = parseOr400;
 const zod_1 = require("zod");
 exports.companyFiltersSchema = zod_1.z.object({
@@ -56,7 +56,9 @@ exports.compareSchema = zod_1.z.object({
     ids: zod_1.z
         .string()
         .min(1)
-        .transform((v) => v.split(',').map((s) => s.trim()).filter(Boolean).slice(0, 4)),
+        .transform((v) => v.split(',').map((s) => s.trim()).filter(Boolean))
+        .refine((arr) => arr.length >= 2 && arr.length <= 4, 'Cities compare supports 2 to 4 location ids')
+        .refine((arr) => new Set(arr).size === arr.length, 'ids must be distinct'),
 });
 exports.assistantSchema = zod_1.z.object({
     query: zod_1.z.string().trim().min(3).max(1000),
@@ -82,6 +84,9 @@ exports.sessionKeySchema = zod_1.z
     .min(8, 'X-Session-Key must be at least 8 characters')
     .max(64, 'X-Session-Key must be at most 64 characters')
     .regex(/^[A-Za-z0-9_-]+$/, 'X-Session-Key may only contain letters, digits, dashes and underscores');
+exports.savedComparisonPatchSchema = zod_1.z.object({
+    name: zod_1.z.string().trim().min(1).max(200),
+});
 exports.savedComparisonCreateSchema = zod_1.z.object({
     name: zod_1.z.string().trim().min(1).max(200),
     location_ids: zod_1.z

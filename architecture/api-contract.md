@@ -88,10 +88,30 @@ Row highlights: `status` (never fake-active), `normalized_benefits` = JSON array
 |---|---|---|
 | GET | `/saved-comparisons` | `{data:[…]}` for the session key |
 | POST | `/saved-comparisons` | `{name, location_ids: 2–4 DISTINCT ids, metric_names?: string[], notes?: string}` → 201; drafted `type` is always `city_comparison` in v1 |
+| PATCH | `/saved-comparisons/:id` | `{name}` → rename (updated_at bumps); 404 cross-session |
 | GET | `/saved-comparisons/:id` | 404 cross-session |
 | DELETE | `/saved-comparisons/:id` | 204 |
 
 Row: `{id, session_key, user_id:null, name, type, location_ids (JSON string), metric_names (JSON string|null), notes, created_at, updated_at}`.
+
+### Usage events (NEW, PRD §3.5 instrumentation)
+| Method | Path | Notes |
+|---|---|---|
+| POST | `/events` | `{name ∈ search\|detail_view\|compare_create\|compare_reopen\|source_click\|export\|saved_create, properties?: ≤8 string values}` → 202 `{accepted:true}`. Session key (if present) is stored only as a truncated sha256 hash — never raw. |
+| GET | `/events/summary` | Aggregate KPI read: `{total_events, window_days:7, events_by_name, events_by_name_last_7_days, distinct_session_hashes}` |
+| GET | `/events/names` | Catalog list |
+
+## Reliability guarantees (Phase 6)
+- **Validation**: every request body/query is parsed by an explicit zod schema (`parseOr400`). Failures → 400 `{error:{code:'validation_error', details:[…]}}`.
+- **Pagination caps**: `page_size` hard-capped at 100 everywhere (repos clamp 1–100).
+- **Rate limiting** (`express-rate-limit`, memory store — swap for redis on horizontal scale):
+  - global ~600 req / 15 min (all routes),
+  - `analysis` tier 40 / 15 min → `/assistant/*`, `/cities/compare`, `/dashboard/*`, `/events/summary`,
+  - `writes` tier 60 / 15 min → `/saved-research`, `/saved-comparisons`, `/events`.
+  - Env-overridable: `RATE_LIMIT_WINDOW_MS`, `RATE_LIMIT_*_MAX`. Disabled when `NODE_ENV=test`.
+- **Errors**: 400 invalid input / 404 unknown record-or-route / 500 unexpected; all JSON envelopes; `requestLogger` logs method, path, status, duration only — headers (incl. `X-Session-Key`) and bodies are never logged.
+- **SQL**: sqlite3 driver with `?`-placeholder prepared statements throughout; all user input reaches SQL only as bound parameters.
+- **Auth decision (evaluated per Phase 6)**: saved research IS private across users, and the implemented strategy is anonymous session-scoped authorization — a client-generated random session key (`X-Session-Key`) scopes every read/write; records are never listed cross-key and deletion/rename require key match. There is **no** hardcoded admin account and no user records table in v1; the `user_id` columns on saved tables are `NULL`-ready for a future upgrade (PRD §2.7 excluded accounts for the prototype). Rate limits + hashing of session keys in analytics keep the strategy honest for a public deployment; adding accounts later is a drop-in on the same tables.
 
 ## Worked examples
 
